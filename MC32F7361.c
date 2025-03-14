@@ -45,24 +45,23 @@ void delay_1_4ms(void)
     }
 }
 
-// 控制信号是以 若干低电平脉冲 + 28ms高电平 + 若干低电平脉冲
-void send_cmd(const u8 data)
+// 发送16位的控制命令，每个16位的控制命令发送后，函数内部会延时33ms
+void send_cmd_16bit(const u16 data)
 {
     u8 i;
-
     if (0 == flag_is_dev_open)
     {
         return;
     }
 
-    for (i = 0; i < 8; i++)
+#if 1 // 控制脚按照样机的波形进行反相输出
+    for (i = 0; i < 16; i++)
     {
-        LED_CTL_PIN = 1;
-        delay_100us();
         LED_CTL_PIN = 0;
-        if ((data >> (7 - i)) & 0x01) // 如果是逻辑1
+        delay_100us();
+        LED_CTL_PIN = 1;
+        if ((data >> (15 - i)) & 0x01) // 如果是逻辑1
         {
-
             delay_ms(3);
         }
         else // 如果是逻辑0
@@ -71,10 +70,11 @@ void send_cmd(const u8 data)
         }
     }
 
-    LED_CTL_PIN = 1;
-    delay_100us();
     LED_CTL_PIN = 0;
+    delay_100us();
+    LED_CTL_PIN = 1;
     delay_ms(33);
+#endif // 控制脚按照样机的波形进行反相输出
 }
 
 /************************************************
@@ -153,70 +153,6 @@ void Sys_Init(void)
     GIE = 1;
 }
 
-void led_mode_handle(u8 mode)
-{
-    u8 tmp = cur_led_status;
-    // cur_led_status = rf_data;
-
-    if (mode == 0x01)
-    {
-        LED_CTL_PIN = 1;
-        delay_ms(5);
-        send_cmd(1);
-        flag_is_dev_open = 1; // 打开灯光
-    }
-    else if (mode == 0x03)
-    {
-        LED_CTL_PIN = 0;
-        flag_is_dev_open = 0; // 关闭灯光
-    }
-    else if (mode == 0x04)
-    {
-        send_cmd(1);
-    }
-    else if (mode == 0x06)
-    {
-        send_cmd(10);
-    }
-    else if (mode == 0x07)
-    {
-        send_cmd(2);
-    }
-    else if (mode == 0x09)
-    {
-        send_cmd(9);
-    }
-    else if (mode == 0x0A)
-    {
-        send_cmd(3);
-    }
-    else if (mode == 0x0C)
-    {
-        send_cmd(8);
-    }
-    else if (mode == 0x0D)
-    {
-        send_cmd(4);
-    }
-    else if (mode == 0x0F)
-    {
-        send_cmd(7);
-    }
-    else if (mode == 0x10)
-    {
-        send_cmd(5);
-    }
-    else if (mode == 0x12)
-    {
-        send_cmd(6);
-    }
-    else
-    {
-        // 如果是无效的键值
-        cur_led_status = tmp; // 让灯光的状态不变
-    }
-}
-
 /************************************************
 ;  *    @函数名            : main
 ;  *    @说明              : 主程序
@@ -230,8 +166,12 @@ void main(void)
 // 红外信号接收引脚：
 #if USE_MY_DEBUG
 
-    P21PU = 1;
-    P21OE = 0;
+    // P21PU = 1;
+    // P21OE = 0;
+
+    // 在样板上的脚位：
+    P16PU = 1;
+    P16OE = 0;
 
 #else
 
@@ -244,72 +184,93 @@ void main(void)
 
     flag_is_dev_open = 1;
 
+    // 从EEPROM中读取数据
+
     while (1)
-    {
-        // DEBUG_PIN = ~DEBUG_PIN;
-        // // delay_200us();
-        // delay_1_4ms();
-
-        // send_cmd(0x96);
-        // send_cmd(0x45);
-
-        // 是按键按下时就做对应的操作，还是按键松开时做对应操作
+    { 
+        // 机械按键按下时就做对应的操作
 
         if (flag_is_recved_data)
         {
-            if (ir_data == 0x08)
+            if (ir_data == 0x08) // ON 按键
             {
-                LED_CTL_PIN = 0;
+
+#if 1 // 控制脚按照样机的波形进行反相输出
+                LED_CTL_PIN = 1;
                 delay_ms(2);
-                LED_CTL_PIN = 1;
-                delay_100us();
-                delay_100us();
                 LED_CTL_PIN = 0;
+                delay_100us();
+                delay_100us();
+                LED_CTL_PIN = 1;
                 delay_ms(3);
-                LED_CTL_PIN = 1;
-                delay_100us();
-                delay_100us();
                 LED_CTL_PIN = 0;
+                delay_100us();
+                delay_100us();
+                LED_CTL_PIN = 1;
                 delay_ms(4);
-                LED_CTL_PIN = 1;
-                delay_100us();
-                delay_100us();
                 LED_CTL_PIN = 0;
+                delay_100us();
+                delay_100us();
+                LED_CTL_PIN = 1;
                 delay_ms(5);
-                LED_CTL_PIN = 1;
-                delay_100us();
-                delay_100us();
                 LED_CTL_PIN = 0;
+                delay_100us();
+                delay_100us();
+                LED_CTL_PIN = 1;
                 delay_ms(51);
-                send_cmd(0x96);
-                send_cmd(0x45);
 
-                send_cmd(0x96);
-                send_cmd(0x45);
+                // 应该换成对应的模式：
 
-                send_cmd(0x08);
-                send_cmd(0xE0);
+                // send_cmd_16bit(0x9645);
+                // send_cmd_16bit(0x9645);
+                // send_cmd_16bit(0x08E0);
+#endif // 控制脚按照样机的波形进行反相输出
             }
-            else if (ir_data == 0x90) // R
+            else if (ir_data == 0xC0) // OFF 按键
             {
-                send_cmd(0x0C);
-                send_cmd(0x00);
-                send_cmd(0x00);
-                send_cmd(0x11);
+                // send_cmd_16bit(0x0C00);
+                // delay_ms(40);
+                // LED_CTL_PIN = 0;
             }
-            else if (ir_data == 0xB8) // G
+            else if (ir_data == 0x80) // AUTO 按键
             {
-                send_cmd(0x0C);
-                send_cmd(0x00);
-                send_cmd(0x00);
-                send_cmd(0x22);
+                // send_cmd_16bit(0x0C00);
+                // send_cmd_16bit(0x9645);
+                // send_cmd_16bit(0x9645);
+                // send_cmd_16bit(0x0F11);
             }
-            else if (ir_data == 0xF8) // B
+            else if (ir_data == 0x60) // SPEED 按键
             {
-                send_cmd(0x0C);
-                send_cmd(0x00);
-                send_cmd(0x00);
-                send_cmd(0x44);
+            }
+            else if (0)  // R3C4
+            {
+
+            }
+            else if (0)
+            {
+                
+            }
+            else
+            {
+                // 可以在这里查表，对程序空间进行优化
+                u8 i;
+                u16 tmp;
+                for (i = 0; i < sizeof(table) / sizeof(table[0]); i++)
+                {
+                    if (table[i][0] == ir_data)
+                    {
+                        send_cmd_16bit(0x0C00); // 几乎每个按键都要发送这个控制命令
+                        tmp = ((u16)table[i][1] << 8) + (u16)table[i][2];
+                        send_cmd_16bit(tmp);
+                        if (table[i][3] != UNUSE_VAL && table[i][4] != UNUSE_VAL)
+                        {
+                            send_cmd_16bit(tmp); // 4 * 16bit的控制命令，中间的 2 * 16bit是相同的，这里只需要重复发送一次
+                            tmp = ((u16)table[i][3] << 8) + (u16)table[i][4];
+                            send_cmd_16bit(tmp);
+                        }
+                        break;
+                    }
+                }
             }
 
             ir_data = 0;

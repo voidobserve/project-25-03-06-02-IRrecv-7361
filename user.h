@@ -64,6 +64,37 @@
 
 volatile u8 cur_led_status; // 记录当前LED的状态
 
+#define UNUSE_VAL (0xFF)
+const u8 table[][5] = {
+    /*
+        [][0] 红外遥控的按键键值
+        [][1] ~ [][4] 按键对应的，待发送的数据
+    */
+    {0x90, 0x00, 0x11, UNUSE_VAL, UNUSE_VAL}, /* R */
+    {0xB8, 0x00, 0x22, UNUSE_VAL, UNUSE_VAL}, /* G */
+    {0xF8, 0x00, 0x44, UNUSE_VAL, UNUSE_VAL}, /* B */
+    {0xB0, 0x96, 0x45, 0x10, 0x77},           /* W */
+
+    {0x98, 0x9F, 0x00, 0x10, 0x33}, /* R3C1 Rank 3 Column 1 第三行第一列 */
+    {0xD8, 0x90, 0xF1, 0x10, 0x66}, /* R3C2 */
+    {0x88, 0x93, 0x0F, 0x10, 0x55}, /* R3C3 */
+
+    {0xE8, 0x9F, 0x10, 0x10, 0x33}, /* R4C1 */ 
+    {0x48, 0x90, 0xF8, 0x10, 0x66}, /* R4C2 */ 
+    {0x68, 0x98, 0x0F, 0x10, 0x55}, /* R4C3 */ 
+
+
+    {0x02, 0x9F, 0x30, 0x10, 0x33}, /* R5C1 */ 
+    {0x32, 0x90, 0xFC, 0x10, 0x66}, /* R5C2 */ 
+    {0x20, 0x9F, 0x0F, 0x10, 0x55}, /* R5C3 */ 
+
+    {0x50, 0x9F, 0xF0, 0x10, 0x33}, /* R6C1 */ 
+    {0x78, 0x90, 0xFF, 0x10, 0x66}, /* R6C2 */ 
+    {0x70, 0x9F, 0x03, 0x10, 0x55}, /* R6C3 */
+    
+    
+};
+
 //===============Field Protection Variables===============
 u8 abuf;
 u8 statusbuf;
@@ -97,14 +128,16 @@ volatile bit_flag flag1;
 #define flag_is_recved_data flag1.bits.bit0
 #define flag_is_dev_open flag1.bits.bit1 // 标志位，灯串是否使能
 
-
-#define last_level_in_ir_pin flag1.bits.bit2 // 在红外接收对应的中断函数中，表示上次引脚对应的电平
-#define filter_level flag1.bits.bit3 // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
+#define last_level_in_ir_pin flag1.bits.bit2        // 在红外接收对应的中断函数中，表示上次引脚对应的电平
+#define filter_level flag1.bits.bit3                // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
 #define flag_is_recv_ir_repeat_code flag1.bits.bit4 // 表示是否接收到了红外信号的重复码，用于区分遥控器是否按下按键后松开
 
 #if USE_MY_DEBUG
 
-#define LED_CTL_PIN P22D // 控制灯串的、给灯串发送控制命令的引脚
+// #define LED_CTL_PIN P22D // 控制灯串的、给灯串发送控制命令的引脚
+
+// 在样板上的脚位：
+#define LED_CTL_PIN P04D // 控制灯串的、给灯串发送控制命令的引脚
 
 #else
 
@@ -116,7 +149,9 @@ volatile bit_flag flag1;
 // 遥控器解码相关配置                                //
 // ===================================================
 #if USE_MY_DEBUG
-#define IR_RECV_PIN P21D // 红外信号接收引脚
+// #define IR_RECV_PIN P21D // 红外信号接收引脚
+// 在样板上的脚位：
+#define IR_RECV_PIN P16D // 红外信号接收引脚
 #else
 #define IR_RECV_PIN P15D // 红外信号接收引脚
 #endif
