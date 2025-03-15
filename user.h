@@ -46,30 +46,76 @@
 
 #define USE_MY_DEBUG 0
 
-// const u8 table[] = {
-//     0x01, // ON
-//     0x04,
-//     0x06,
-//     0x07,
-//     0x09,
-//     0x0A,
+// ===================================================
+// EEPROM的相关配置                               //
+// ===================================================
 
-//     0x0C,
-//     0x0D,
-//     0x0F,
-//     0x10,
-//     0x12,
-//     0x03, // OFF
+// struct
+// {
+
 // };
 
+// ===================================================
+// AUTO按键的相关配置                                //
+// ===================================================
+
+// 定义auto模式下，发送数据的周期：
+enum
+{
+    CUR_AUTO_PERIOD_3S = 0, // 每3s发送一次数据
+    CUR_AUTO_PERIOD_10S,    // 每10s发送一次数据
+    CUR_AUTO_PERIOD_7_5S,   // 每7.5s发送一次数据
+    CUR_AUTO_PERIOD_5S,     // 每5s发送一次数据
+};
+// typedef struct
+// {
+//     volatile u8 cur_auto_period;
+// }cur_auto_info_t;
+
+// volatile cur_auto_info_t cur_auto_info;
+
+volatile u8 cur_auto_period; // 记录auto模式下，发送数据的周期
+
+// 定义灯光的模式:
+enum
+{
+    CUR_LED_STATUS_OFF = 0,
+    CUR_LED_STATUS_AUTO,
+    CUR_LED_STATUS_SINGLE_COLOR, // 单色灯模式
+    CUR_LED_STATUS_R3C4,         // 按键R3C4对应的模式，每次按下会改变LED当前的颜色
+
+};
 volatile u8 cur_led_status; // 记录当前LED的状态
 
-#define UNUSE_VAL (0xFF)
+// 定义 R3C4 对应的功能
+enum
+{
+    R3C4_STATUS_1 = 0,
+    R3C4_STATUS_2,
+    R3C4_STATUS_3,
+};
+volatile u8 cur_r3c4_status;
+
+// 定义具有特殊功能的红外遥控按键键值
+enum
+{
+    IR_KEY_ON = 0x08,
+    IR_KEY_OFF = 0xC0,
+    IR_KEY_AUTO = 0x80,
+    IR_KEY_SPEED = 0x60,
+    IR_KEY_R3C4 = 0xA8, // R3C4，每次按下时会改变当前显示的颜色
+    IR_KEY_R4C4_FADE = 0xB2,
+    IR_KEY_JUMP = 0x00,
+};
+
+#define UNUSE_VAL (0xFF) // 未使用的数据值
 const u8 table[][5] = {
     /*
         [][0] 红外遥控的按键键值
         [][1] ~ [][4] 按键对应的，待发送的数据
     */
+    {IR_KEY_AUTO, 0x96, 0x45, 0x0F, 0x11}, /* AUTO，待发送的数据是固定的 */
+
     {0x90, 0x00, 0x11, UNUSE_VAL, UNUSE_VAL}, /* R */
     {0xB8, 0x00, 0x22, UNUSE_VAL, UNUSE_VAL}, /* G */
     {0xF8, 0x00, 0x44, UNUSE_VAL, UNUSE_VAL}, /* B */
@@ -79,20 +125,18 @@ const u8 table[][5] = {
     {0xD8, 0x90, 0xF1, 0x10, 0x66}, /* R3C2 */
     {0x88, 0x93, 0x0F, 0x10, 0x55}, /* R3C3 */
 
-    {0xE8, 0x9F, 0x10, 0x10, 0x33}, /* R4C1 */ 
-    {0x48, 0x90, 0xF8, 0x10, 0x66}, /* R4C2 */ 
-    {0x68, 0x98, 0x0F, 0x10, 0x55}, /* R4C3 */ 
+    {0xE8, 0x9F, 0x10, 0x10, 0x33}, /* R4C1 */
+    {0x48, 0x90, 0xF8, 0x10, 0x66}, /* R4C2 */
+    {0x68, 0x98, 0x0F, 0x10, 0x55}, /* R4C3 */
 
+    {0x02, 0x9F, 0x30, 0x10, 0x33}, /* R5C1 */
+    {0x32, 0x90, 0xFC, 0x10, 0x66}, /* R5C2 */
+    {0x20, 0x9F, 0x0F, 0x10, 0x55}, /* R5C3 */
 
-    {0x02, 0x9F, 0x30, 0x10, 0x33}, /* R5C1 */ 
-    {0x32, 0x90, 0xFC, 0x10, 0x66}, /* R5C2 */ 
-    {0x20, 0x9F, 0x0F, 0x10, 0x55}, /* R5C3 */ 
-
-    {0x50, 0x9F, 0xF0, 0x10, 0x33}, /* R6C1 */ 
-    {0x78, 0x90, 0xFF, 0x10, 0x66}, /* R6C2 */ 
+    {0x50, 0x9F, 0xF0, 0x10, 0x33}, /* R6C1 */
+    {0x78, 0x90, 0xFF, 0x10, 0x66}, /* R6C2 */
     {0x70, 0x9F, 0x03, 0x10, 0x55}, /* R6C3 */
-    
-    
+
 };
 
 //===============Field Protection Variables===============
@@ -103,10 +147,10 @@ u8 statusbuf;
 void Sys_Init(void);
 void CLR_RAM(void);
 void IO_Init(void);
-void TIMER0_INT_Init(void);
-void TIMER1_INT_Init(void);
+// void TIMER0_INT_Init(void);
+// void TIMER1_INT_Init(void);
 void TIMER2_INT_Init(void);
-void TIMER3_INT_Init(void);
+// void TIMER3_INT_Init(void);
 
 //============Define  Flag=================
 typedef union
@@ -131,6 +175,8 @@ volatile bit_flag flag1;
 #define last_level_in_ir_pin flag1.bits.bit2        // 在红外接收对应的中断函数中，表示上次引脚对应的电平
 #define filter_level flag1.bits.bit3                // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
 #define flag_is_recv_ir_repeat_code flag1.bits.bit4 // 表示是否接收到了红外信号的重复码，用于区分遥控器是否按下按键后松开
+
+#define flag_tim_set_period_is_arrive_in_auto_mode flag1.bits_bit5 // 表示在 AUTO 模式下，是否到了数据发送的周期
 
 #if USE_MY_DEBUG
 
