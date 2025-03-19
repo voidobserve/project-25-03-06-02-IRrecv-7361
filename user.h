@@ -44,7 +44,9 @@
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-#define USE_MY_DEBUG 0
+#define USE_MY_DEBUG 1
+
+volatile u8 flag_is_press_speed; // 标志位，是否按下过speed且未进行处理
 
 // ===================================================
 // EEPROM的相关配置                               //
@@ -59,22 +61,141 @@
 // AUTO按键的相关配置                                //
 // ===================================================
 
-// 定义auto模式下，发送数据的周期：
+// 定义auto子模式下要发送的数据，内部有或操作运算的说明每个子模式下，这里会有不同（在或运算的第二个操作数有不同）
+// 有空行分隔的说明是子模式下的各个子部份
+const u8 table_auto_in_submode[][2] = {
+    {(0x00 | 0x00), 0x22}, // [0]
+    {(0x00 | 0x00), 0x44}, // [1]
+    {(0x00 | 0x00), 0x33}, // [2]
+    {(0x00 | 0x00), 0x55}, // [3]
+    {(0x00 | 0x00), 0x66}, // [4]
+    {(0x10 | 0x00), 0x77}, // [5]
+    {(0x00 | 0x00), 0x88}, // [6]
+    {(0x00 | 0x00), 0xAA}, // [7]
+    {(0x00 | 0x00), 0xCC}, // [8]
+
+    {0xC0, 0x00}, // [9]
+    {0x00, 0x11}, // [10]
+
+    {0x00, 0x22}, // [11]
+    {0x00, 0x44}, // [12]
+    {0x00, 0x33}, // [13]
+    {0x00, 0x55}, // [14]
+    {0x00, 0x66}, // [15]
+    {0x10, 0x77}, // [16]
+    {0x00, 0x88}, // [17]
+    {0x00, 0xAA}, // [18]
+    {0x00, 0xCC}, // [19]
+
+    {0xC0, 0x00},        // [20]
+    {0x00 | 0x00, 0x21}, // [21]
+
+    {0x10 | 0x00, 0x74}, // [22]
+    {0x00 | 0x00, 0x53}, // [23]
+    {0x00 | 0x00, 0x41}, // [24]
+    {0x00 | 0x00, 0x24}, // [25]
+    {0x00 | 0x00, 0x45}, // [26]
+
+    {0x0C, 0x00},        // [27]
+    {0x00 | 0x00, 0xE0}, // [28]
+
+    {0x00 | 0x00, 0xA0}, // [29]
+    {0x00 | 0x00, 0xC0}, // [30]
+
+    {0xC0, 0x00}, // [31]
+    {0x00, 0xEE}, // [32]
+
+    {0x00, 0xEE}, // [33]
+    {0x00, 0xEE}, // [34]
+    {0x00, 0xEE}, // [35]
+    {0x00, 0xEE}, // [36]
+    {0x00, 0xEE}, // [37]
+    {0x00, 0xEE}, // [38]
+    {0x00, 0xEE}, // [39]
+    {0x00, 0xEE}, // [40]
+    {0x00, 0xEE}, // [41]
+
+    {0x00, 0xAA}, // [42]
+    {0x00, 0xAA}, // [43]
+    {0x00, 0xAA}, // [44]
+    {0x00, 0xAA}, // [45]
+    {0x00, 0xAA}, // [46]
+    {0x00, 0xAA}, // [47]
+    {0x00, 0xAA}, // [48]
+    {0x00, 0xAA}, // [49]
+    {0x00, 0xAA}, // [50]
+    {0x00, 0xAA}, // [51]
+
+    {0x00, 0xCC}, // [52]
+    {0x00, 0xCC}, // [53]
+    {0x00, 0xCC}, // [54]
+    {0x00, 0xCC}, // [55]
+    {0x00, 0xCC}, // [56]
+    {0x00, 0xCC}, // [57]
+    {0x00, 0xCC}, // [58]
+    {0x00, 0xCC}, // [59]
+    {0x00, 0xCC}, // [60]
+    {0x00, 0xCC}, // [61]
+
+    {0x0C, 0x00},        // [62]
+    {0x00 | 0x00, 0x17}, // [63]
+    {0x00 | 0x00, 0x27}, // [64]
+    {0x00 | 0x00, 0x47}, // [65]
+    {0x00 | 0x00, 0x37}, // [66]
+    {0x00 | 0x00, 0x57}, // [67]
+    {0x00 | 0x00, 0x67}, // [68]
+    {0x10 | 0x00, 0x77}, // [69]
+    {0x00 | 0x00, 0x87}, // [70]
+    {0x00 | 0x00, 0xA7}, // [71]
+    {0x00 | 0x00, 0xC7}, // [72]
+
+    {0x0C, 0x00},        // [73]
+    {0x80 | 0x00, 0x11}, // [74]
+
+    {0x80 | 0x00, 0x12}, // [75]
+    {0x80 | 0x00, 0x22}, // [76]
+    {0x80 | 0x00, 0x24}, // [77]
+    {0x80 | 0x00, 0x44}, // [78]
+    {0x80 | 0x00, 0x14}, // [79]
+
+    {0x0C, 0x00},        // [80]
+    {0x00 | 0x00, 0x11}, // [81] 到这里表示一轮结束
+};
+
+// const u16 table_submode1_delay_time[] = {
+
+// };
+
+// 定义auto模式下的各个子模式
 enum
 {
-    CUR_AUTO_PERIOD_3S = 0, // 每3s发送一次数据
-    CUR_AUTO_PERIOD_10S,    // 每10s发送一次数据
-    CUR_AUTO_PERIOD_7_5S,   // 每7.5s发送一次数据
-    CUR_AUTO_PERIOD_5S,     // 每5s发送一次数据
+    CUR_AUTO_SUBMODE_1 = 0, //
+    CUR_AUTO_SUBMODE_2,     //
+    CUR_AUTO_SUBMODE_3,     //
+    CUR_AUTO_SUBMODE_4,     //
 };
-// typedef struct
-// {
-//     volatile u8 cur_auto_period;
-// }cur_auto_info_t;
 
-// volatile cur_auto_info_t cur_auto_info;
+// volatile u8 cur_auto_submode; // 记录auto模式下的子模式
 
-volatile u8 cur_auto_period; // 记录auto模式下，发送数据的周期
+// 定义auto模式下，子模式的各个执行环节
+enum
+{
+    CUR_SUBMODE_STATUS_NONE = 0,
+    CUR_SUBMODE_STATUS_READY_TO_SEND,             // 准备发送数据
+    CUR_SUBMODE_STATUS_PREPARE_TO_SET_DELAY_TIME, // 准备设置距离发送下一个数据帧的延时时间
+    CUR_SUBMODE_STATUS_STANDBY,                   // 正在等待两个数据帧之间的时间间隔
+};
+
+typedef struct
+{
+    volatile u16 delay_time; // auto模式下，当前子模式对应的延时时间
+
+    volatile u8 cur_auto_submode;   // 记录auto模式下的子模式
+    volatile u8 cur_submode_index;  // 当前执行到子模式的哪一个下标
+    volatile u8 cur_submode_status; // 当前子模式正处于发送周期的哪个状态
+
+} auto_mode_info_t;
+volatile auto_mode_info_t auto_mode_info;
 
 // 定义灯光的模式:
 enum
@@ -109,7 +230,7 @@ enum
 };
 
 #define UNUSE_VAL (0xFF) // 未使用的数据值
-const u8 table[][5] = {
+const u8 table_irkey[][5] = {
     /*
         [][0] 红外遥控的按键键值
         [][1] ~ [][4] 按键对应的，待发送的数据
@@ -144,12 +265,12 @@ u8 abuf;
 u8 statusbuf;
 
 //===============Global Function===============
-void Sys_Init(void);
-void CLR_RAM(void);
-void IO_Init(void);
+// void Sys_Init(void);
+// void CLR_RAM(void);
+// void IO_Init(void);
 // void TIMER0_INT_Init(void);
 // void TIMER1_INT_Init(void);
-void TIMER2_INT_Init(void);
+// void TIMER2_INT_Init(void);
 // void TIMER3_INT_Init(void);
 
 //============Define  Flag=================
@@ -169,21 +290,21 @@ typedef union
     } bits;
 } bit_flag;
 volatile bit_flag flag1;
-#define flag_is_recved_data flag1.bits.bit0
-#define flag_is_dev_open flag1.bits.bit1 // 标志位，灯串是否使能
+#define flag_is_recved_data flag1.bits.bit0 // 是否收到了红外数据，并且没有做处理
+#define flag_is_dev_open flag1.bits.bit1    // 标志位，灯串是否使能
 
 #define last_level_in_ir_pin flag1.bits.bit2        // 在红外接收对应的中断函数中，表示上次引脚对应的电平
 #define filter_level flag1.bits.bit3                // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
 #define flag_is_recv_ir_repeat_code flag1.bits.bit4 // 表示是否接收到了红外信号的重复码，用于区分遥控器是否按下按键后松开
 
-#define flag_tim_set_period_is_arrive_in_auto_mode flag1.bits_bit5 // 表示在 AUTO 模式下，是否到了数据发送的周期
+// #define flag_tim_set_period_is_arrive_in_auto_mode flag1.bits.bit5 // 表示在 AUTO 模式下，是否到了数据发送的周期
 
 #if USE_MY_DEBUG
 
-// #define LED_CTL_PIN P22D // 控制灯串的、给灯串发送控制命令的引脚
+#define LED_CTL_PIN P22D // 控制灯串的、给灯串发送控制命令的引脚
 
-// 在样板上的脚位：
-#define LED_CTL_PIN P04D // 控制灯串的、给灯串发送控制命令的引脚
+// // 在样板上的脚位：
+// #define LED_CTL_PIN P04D // 控制灯串的、给灯串发送控制命令的引脚
 
 #else
 
@@ -195,9 +316,9 @@ volatile bit_flag flag1;
 // 遥控器解码相关配置                                //
 // ===================================================
 #if USE_MY_DEBUG
-// #define IR_RECV_PIN P21D // 红外信号接收引脚
-// 在样板上的脚位：
-#define IR_RECV_PIN P16D // 红外信号接收引脚
+#define IR_RECV_PIN P21D // 红外信号接收引脚
+// // 在样板上的脚位：
+// #define IR_RECV_PIN P16D // 红外信号接收引脚
 #else
 #define IR_RECV_PIN P15D // 红外信号接收引脚
 #endif
@@ -225,7 +346,7 @@ void delay_ms(u16 xms)
 
 // #if USE_MY_DEBUG
 #define DEBUG_PIN P22D
-#if 1 // 以下程序约占用81字节空间
+#if 0  // 以下程序约占用81字节空间
 // 通过一个引脚输出数据(发送一次约400ms)
 // #define DEBUG_PIN P22D
 void send_data_msb(u32 send_data)
