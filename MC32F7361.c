@@ -368,7 +368,241 @@ void main(void)
             }
             else if (ir_data == IR_KEY_R4C4_FADE)
             {
-                // cur_led_status = CUR_LED_STATUS_AUTO;
+#if ENABLE_FADE
+                // 如果按下了 R4C4、FADE
+                u16 tmp = 0x0011;
+                cur_led_status = CUR_LED_STATUS_R4C4_FADE;
+
+                // 判断当前FADE挡位对应的发送时间间隔
+
+                if (CUR_FADE_PERIOD_1 == fade_info.cur_fade_period)
+                {
+                    //  如果是每5s发送一次数据帧
+                    tmp |= 0x0D << 8;
+                }
+                else if (CUR_FADE_PERIOD_2 == fade_info.cur_fade_period)
+                {
+                    // 如果是每2.76s发送一次数据帧
+                    tmp |= 0x0C << 8;
+                }
+                else if (CUR_FADE_PERIOD_3 == fade_info.cur_fade_period)
+                {
+                    // 如果是每10s发送一次数据帧
+                    tmp |= 0x0F << 8;
+                }
+                // else if (CUR_FADE_PERIOD_4 == fade_info.cur_fade_period)
+                else
+                {
+                    // 如果是每7.55s发送一次数据帧
+                    tmp |= 0x0E << 8;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 清空FADE模式中使用的变量
+                fade_info.cur_fade_index = 0;
+                fade_info.cur_fade_status = CUR_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示fade模式刚开始，需要等待一段时间再发送数据帧
+
+// 等待一段时间，再开始发送数据
+#endif // #if ENABLE_FADE
+            }
+            else if (ir_data == IR_KEY_R5C4_JUMP)
+            {
+#if ENABLE_JUMP
+                // 如果按下了 JUMP
+                u16 tmp;
+                cur_led_status = CUR_LED_STATUS_R5C4_JUMP;
+
+                // 根据JUMP当前的发送周期，来区分当前发送的第4帧数据
+                if (CUR_JUMP_PERIOD_1 == jump_info.cur_jump_period)
+                {
+                    // 如果是每170ms发送一次数据帧
+                    tmp = 0x0022;
+                    jump_info.cur_jump_index = 1;
+                }
+                else
+                {
+                    // 如果是其他的发送周期
+                    tmp = 0x0011;
+                    jump_info.cur_jump_index = 0;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 清空 JUMP 模式中使用的变量
+                jump_info.cur_jump_status = CUR_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示 模式刚开始，需要等待一段时间再发送数据帧
+
+#endif //  #if ENABLE_JUMP
+            }
+            else if (ir_data == IR_KEY_R6C4_ASYN_FADE)
+            {
+#if ENABLE_ASYN_FADE
+                // 如果按下了 asyn_fade
+                u16 tmp;
+                cur_led_status = CUR_LED_STATUS_R6C4_ASYN_FADE;
+
+                // 根据 asyn_fade 当前的模式，来区分当前发送的第4帧数据
+                if (CUR_ASYN_FADE_SUBMODE_0 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 如果是 子模式0
+                    tmp = 0x0821;
+                }
+                else if (CUR_ASYN_FADE_SUBMODE_1 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 如果是 子模式1
+                    tmp = 0x0A21;
+                }
+                else if (CUR_ASYN_FADE_SUBMODE_2 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 如果是 子模式2
+                    tmp = 0x0921;
+                }
+                // else if (CUR_ASYN_FADE_SUBMODE_3 == asyn_fade_info.cur_asyn_fade_submode)
+                else
+                {
+                    // 如果是 子模式3
+                    tmp = 0x0B21;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 清空 asyn_fade 模式中使用的变量
+                asyn_fade_info.cur_asyn_fade_index = 1;                                               // 跳过第0个下标对应的数据帧，因为上面已经发送
+                asyn_fade_info.cur_asyn_fade_status = CUR_ASYN_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示 模式刚开始，需要等待一段时间再发送数据帧
+
+#endif // #if ENABLE_ASYN_FADE
+            }
+            else if (ir_data == IR_KEY_R7C1_IN_WAVES)
+            {
+#if ENABLE_IN_WAVES
+                // 如果按下了 in_waves
+                u16 tmp;
+                cur_led_status = CUR_LED_STATUS_R7C1_IN_WAVES;
+
+                // 根据 in_waves 当前的发送周期，来区分当前发送的第4帧数据
+                if (CUR_IN_WAVES_PERIOD_0 == in_waves_info.cur_in_waves_period)
+                {
+                    // 如果是 5.557s发送一次
+                    tmp = 0x8711;
+                }
+                else if (CUR_IN_WAVES_PERIOD_1 == in_waves_info.cur_in_waves_period)
+                {
+                    // 如果是 4.56s发送一次
+                    tmp = 0x8611;
+                }
+                else if (CUR_IN_WAVES_PERIOD_2 == in_waves_info.cur_in_waves_period)
+                {
+                    // 如果是 3.36s发送一次
+                    tmp = 0x8511;
+                }
+                // else if (CUR_IN_WAVES_PERIOD_3 == in_waves_info.cur_in_waves_period)
+                else
+                {
+                    // 如果是 2s发送一次
+                    tmp = 0x8411;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 清空 in_waves 模式中使用的变量
+                in_waves_info.cur_in_waves_index = 1;                                              // 从下标为1对应的位置开始发送，第0个数据帧已经在上面发送
+                in_waves_info.cur_in_waves_status = CUR_IN_WAVES_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示 模式刚开始，需要等待一段时间再发送数据帧
+
+#endif // #if ENABLE_IN_WAVES
+            }
+            else if (ir_data == IR_KEY_R7C2_STROBE)
+            {
+#if ENABLE_STROBE
+                // 如果按下了 strobe
+                u16 tmp;
+                cur_led_status = CUR_LED_STATUS_R7C2_STROBE;
+
+                // 根据 strobe 当前的子模式，来区分当前发送的第4帧数据
+                if (CUR_STROBE_SUBMODE_0 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式0
+                    tmp = 0x0817;
+                }
+                else if (CUR_STROBE_SUBMODE_1 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式1
+                    tmp = 0x0A17;
+                }
+                else if (CUR_STROBE_SUBMODE_2 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式2
+                    tmp = 0x0917;
+                }
+                // else if (CUR_STROBE_SUBMODE_3 == strobe_info.cur_strobe_submode)
+                else
+                {
+                    // 如果是 子模式3
+                    tmp = 0x0B17;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 初始化 strobe 模式中使用的变量
+                strobe_info.cur_strobe_index = 1;                                            // 从下标为1对应的位置开始发送，第0个数据帧已经在上面发送
+                strobe_info.cur_strobe_status = CUR_STROBE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示 模式刚开始，需要等待一段时间再发送数据帧
+
+#endif // #if ENABLE_STROBE
+            }
+            else if (ir_data == IR_KEY_R7C4_ASYN_JUMP)
+            {
+#if ENABLE_ASYN_JUMP
+                // 如果按下了 asyn_jump
+                u16 tmp;
+                cur_led_status = CUR_LED_STATUS_R7C4_ASYN_JUMP;
+
+                // 根据 asyn_jump 当前的子模式，来区分当前发送的第4帧数据
+                if (CUR_ASYN_JUMP_SUBMODE_0 == asyn_jump_info.cur_asyn_jump_status)
+                {
+                    // 如果是 子模式0
+                    tmp = 0x08E0;
+                }
+                else if (CUR_ASYN_JUMP_SUBMODE_1 == asyn_jump_info.cur_asyn_jump_status)
+                {
+                    // 如果是 子模式1
+                    tmp = 0x0AE0;
+                }
+                else if (CUR_ASYN_JUMP_SUBMODE_2 == asyn_jump_info.cur_asyn_jump_status)
+                {
+                    // 如果是 子模式2
+                    tmp = 0x09E0;
+                }
+                // else if (CUR_ASYN_JUMP_SUBMODE_3 == asyn_jump_info.cur_asyn_jump_status)
+                else
+                {
+                    // 如果是 子模式3
+                    tmp = 0x0BE0;
+                }
+
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(0x9645);
+                send_cmd_16bit(tmp);
+
+                // 初始化 asyn_jump 模式中使用的变量
+                asyn_jump_info.cur_asyn_jump_index = 1;                                               // 从下标为1对应的位置开始发送，第0个数据帧已经在上面发送
+                asyn_jump_info.cur_asyn_jump_status = CUR_ASYN_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME; // 表示 模式刚开始，需要等待一段时间再发送数据帧
+
+#endif // #if ENABLE_ASYN_JUMP
             }
             else
             {
@@ -378,6 +612,7 @@ void main(void)
 
                 if (IR_KEY_AUTO == ir_data) // AUTO 按键
                 {
+#if ENABLE_AUTO
                     cur_led_status = CUR_LED_STATUS_AUTO; // 表示当前处于 AUTO 模式
 
                     // 清空auto模式中使用到的变量
@@ -385,6 +620,19 @@ void main(void)
                     auto_mode_info.cur_submode_index = 0;
                     auto_mode_info.delay_time = 0;
                     auto_mode_info.cur_submode_status = CUR_SUBMODE_STATUS_PREPARE_TO_SET_DELAY_TIME; // auto模式刚开始，需要等待一段时间再发送一帧数据
+#endif                                                                                                // #if ENABLE_AUTO
+                }
+                else if (IR_KEY_R7C3_TWINKLE == ir_data) // R7C3 TWINKLE 按键
+                {
+#if ENABLE_TWINKLE
+
+                    cur_led_status = CUR_LED_STATUS_R7C3_TWINKLE;
+
+                    // 初始化 twinkle中使用到的变量
+                    twinkle_info.cur_twinkle_subindex = 1;                                          // 按下 twinkle 按键后，就会发送第0帧数据，这里让子下标设置为1，表示下一次发送第1帧数据
+                    twinkle_info.cur_twinkle_status = CUR_TWINKLE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 等待设置延时时间
+
+#endif // #if ENABLE_TWINKLE
                 }
                 else
                 {
@@ -392,6 +640,7 @@ void main(void)
                     cur_led_status = CUR_LED_STATUS_SINGLE_COLOR;
                 }
 
+                // 查表，发送对应的数据
                 for (i = 0; i < sizeof(table_irkey) / sizeof(table_irkey[0]); i++)
                 {
                     if (table_irkey[i][0] == ir_data)
@@ -416,6 +665,7 @@ void main(void)
 
         if (CUR_LED_STATUS_AUTO == cur_led_status) // 如果当前处于 AUTO 模式
         {
+#if ENABLE_AUTO
             // 检测是否有按下 SPEED，如果有按下，改变auto模式的子模式：
             if (flag_is_press_speed)
             {
@@ -423,7 +673,6 @@ void main(void)
 
                 { // 发送按下SPEED按键后，对应的数据帧
                     u8 tmp;
-                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
                     if (CUR_AUTO_SUBMODE_1 == auto_mode_info.cur_auto_submode)
                     {
                         tmp = 0x0F;
@@ -442,7 +691,8 @@ void main(void)
                         tmp = 0x0C;
                     }
 
-                    send_cmd_16bit(((u32)tmp << 8) | 0x11);
+                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                    send_cmd_16bit(((u16)tmp << 8) | 0x11);
                 } // 发送按下SPEED按键后，对应的数据帧
 
                 auto_mode_info.cur_auto_submode++;
@@ -468,6 +718,7 @@ void main(void)
             // 设置发送时间间隔：
             if (CUR_SUBMODE_STATUS_PREPARE_TO_SET_DELAY_TIME == auto_mode_info.cur_submode_status)
             {
+
                 /*
                     一轮auto模式刚开始，数组中第0~8帧数据的延时时间，
                     子模式1是 3s
@@ -715,7 +966,7 @@ void main(void)
                     // else if  (CUR_AUTO_SUBMODE_4 == auto_mode_info.cur_auto_submode)
                     else
                     {
-                        tmp |= (0x08  << 8);
+                        tmp |= (0x08 << 8);
                     }
                 }
                 // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
@@ -732,9 +983,781 @@ void main(void)
                 // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
                 auto_mode_info.cur_submode_status = CUR_SUBMODE_STATUS_PREPARE_TO_SET_DELAY_TIME;
             }
+#endif // #if ENABLE_AUTO
         }
-        else // 不处于auto模式，清空auto模式使用到的变量（可以不清空）
+        else if (CUR_LED_STATUS_R4C4_FADE == cur_led_status) // 如果当前处于 fade 模式，进行相应操作
         {
+#if ENABLE_FADE
+            // 检测是否有按下 SPEED，如果有按下，改变fade模式的发送时间间隔：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                { // 发送按下SPEED按键后，对应的数据帧
+                    u8 tmp;
+                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                    if (CUR_FADE_PERIOD_1 == fade_info.cur_fade_period)
+                    {
+                        tmp = 0x0C;
+                    }
+                    else if (CUR_FADE_PERIOD_2 == fade_info.cur_fade_period)
+                    {
+                        tmp = 0x0F;
+                    }
+                    else if (CUR_FADE_PERIOD_3 == fade_info.cur_fade_period)
+                    {
+                        tmp = 0x0E;
+                    }
+                    // else if (CUR_FADE_PERIOD_4 == fade_info.cur_fade_period)
+                    else
+                    {
+                        tmp = 0x0D;
+                    }
+
+                    send_cmd_16bit(((u16)tmp << 8) | 0x11);
+                } // 发送按下SPEED按键后，对应的数据帧
+
+                fade_info.cur_fade_period++;
+                if (fade_info.cur_fade_period > CUR_FADE_PERIOD_4)
+                {
+                    fade_info.cur_fade_period = CUR_FADE_PERIOD_1;
+                }
+
+                // 如果有按下 SPEED，切换数据发送周期，清空当前数据发送周期的计数
+                // 清空 fade 模式使用到的计数变量
+                fade_info.cur_fade_index = 0;
+                fade_info.cur_fade_status = CUR_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的发送周期写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变auto模式的子模式
+
+            // 设置发送时间间隔：
+            if (CUR_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME == fade_info.cur_fade_status)
+            {
+                /*
+                    fade模式下，各个发送周期
+                    5s
+                    2.76s
+                    10s
+                    7.55s
+                */
+
+                if (CUR_FADE_PERIOD_1 == fade_info.cur_fade_period)
+                {
+                    fade_info.delay_time = 5155;
+                }
+                else if (CUR_FADE_PERIOD_2 == fade_info.cur_fade_period)
+                {
+                    fade_info.delay_time = 2760;
+                }
+                else if (CUR_FADE_PERIOD_3 == fade_info.cur_fade_period)
+                {
+                    fade_info.delay_time = 10000;
+                }
+                // else if  (CUR_FADE_PERIOD_4 == fade_info.cur_fade_period)
+                else
+                {
+                    fade_info.delay_time = 7550;
+                }
+
+                // 设置完发送时间间隔后，进入等待模式
+                fade_info.cur_fade_status = CUR_FADE_STATUS_STANDBY;
+            }
+            // if (CUR_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME == fade_info.cur_fade_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_FADE_STATUS_READY_TO_SEND == fade_info.cur_fade_status)
+            {
+                u16 tmp = ((u16)table_fade[fade_info.cur_fade_index][0] << 8) | table_fade[fade_info.cur_fade_index][1];
+
+                // 根据当前发送的数据帧下标，适配不同发送周期下的数据：
+                if (CUR_FADE_PERIOD_1 == fade_info.cur_fade_period)
+                {
+                    // 发送周期 5s
+                    tmp |= (0x0D << 8);
+                }
+                else if (CUR_FADE_PERIOD_2 == fade_info.cur_fade_period)
+                {
+                    // 发送周期 2.76s
+                    tmp |= (0x0C << 8);
+                }
+                else if (CUR_FADE_PERIOD_3 == fade_info.cur_fade_period)
+                {
+                    // 发送周期 10s
+                    tmp |= (0x0F << 8);
+                }
+                // else if  (CUR_FADE_PERIOD_4 == fade_info.cur_fade_period)
+                else
+                {
+                    // 发送周期 7.55s
+                    tmp |= (0x0E << 8);
+                }
+
+                // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+                fade_info.cur_fade_index++;
+                if (fade_info.cur_fade_index >= ARRAY_SIZE(table_fade))
+                {
+                    // 如果下标越界
+                    fade_info.cur_fade_index = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                fade_info.cur_fade_status = CUR_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+#endif // #if ENABLE_FADE
+        } //  else if (CUR_LED_STATUS_R4C4_FADE == cur_led_status) // 如果当前处于 fade 模式，进行相应操作
+        else if (CUR_LED_STATUS_R5C4_JUMP == cur_led_status) // 如果当前处于 JUMP 模式
+        {
+
+#if ENABLE_JUMP
+            // 检测是否有按下 SPEED，如果有按下，改变fade模式的发送时间间隔：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x0011);
+
+                jump_info.cur_jump_period++;
+                if (jump_info.cur_jump_period > CUR_JUMP_PERIOD_4)
+                {
+                    jump_info.cur_jump_period = CUR_JUMP_PERIOD_1;
+                }
+
+                // 如果有按下 SPEED，切换数据发送周期，清空当前数据发送周期的计数
+                // 清空 jump 模式使用到的计数变量
+                jump_info.cur_jump_index = 0;
+                jump_info.cur_jump_status = CUR_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的发送周期写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变发送周期
+
+            // 设置发送时间间隔：
+            if (CUR_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME == jump_info.cur_jump_status)
+            {
+                /*
+                    jump 模式下，各个发送周期
+
+                */
+
+                if (CUR_JUMP_PERIOD_1 == jump_info.cur_jump_period)
+                {
+                    jump_info.delay_time = 170;
+                }
+                else if (CUR_JUMP_PERIOD_2 == jump_info.cur_jump_period)
+                {
+                    jump_info.delay_time = 1966;
+                }
+                else if (CUR_JUMP_PERIOD_3 == jump_info.cur_jump_period)
+                {
+                    jump_info.delay_time = 970;
+                }
+                // else if  (CUR_JUMP_PERIOD_4 == jump_info.cur_jump_period)
+                else
+                {
+                    jump_info.delay_time = 470;
+                }
+
+                // 设置完发送时间间隔后，进入等待模式
+                jump_info.cur_jump_status = CUR_JUMP_STATUS_STANDBY;
+            }
+            // if (CUR_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME == jump_info.cur_jump_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_JUMP_STATUS_READY_TO_SEND == jump_info.cur_jump_status)
+            {
+                u16 tmp = ((u16)table_jump[jump_info.cur_jump_index][0] << 8) | table_jump[jump_info.cur_jump_index][1];
+
+                // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+
+                jump_info.cur_jump_index++;
+                if (jump_info.cur_jump_index >= ARRAY_SIZE(table_jump))
+                {
+                    // 如果下标越界
+                    jump_info.cur_jump_index = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                jump_info.cur_jump_status = CUR_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+#endif // #if ENABLE_JUMP
+        } // else if (CUR_LED_STATUS_R5C4_JUMP == cur_led_status) // 如果当前处于 JUMP 模式
+        else if (CUR_LED_STATUS_R6C4_ASYN_FADE == cur_led_status) // 如果当前处于 asyn_fade 模式
+        {
+#if ENABLE_ASYN_FADE
+            // 检测是否有按下 SPEED，如果有按下，改变 asyn_fade 模式的子模式：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                asyn_fade_info.cur_asyn_fade_submode++; // 每次按下SPEED按键，都切换子模式
+                if (asyn_fade_info.cur_asyn_fade_submode > CUR_ASYN_FADE_SUBMODE_3)
+                {
+                    asyn_fade_info.cur_asyn_fade_submode = CUR_ASYN_FADE_SUBMODE_0;
+                }
+
+                { // 发送按下SPEED按键后，对应的数据帧
+                    u16 tmp;
+
+                    if (CUR_ASYN_FADE_SUBMODE_0 == asyn_fade_info.cur_asyn_fade_submode)
+                    {
+                        //  如果当前是子模式0
+                        tmp = 0x0800;
+                    }
+                    else if (CUR_ASYN_FADE_SUBMODE_1 == asyn_fade_info.cur_asyn_fade_submode)
+                    {
+                        //  如果当前是子模式1
+                        tmp = 0x0A00;
+                    }
+                    else if (CUR_ASYN_FADE_SUBMODE_2 == asyn_fade_info.cur_asyn_fade_submode)
+                    {
+                        //  如果当前是子模式2
+                        tmp = 0x0900;
+                    }
+                    // else if (CUR_ASYN_FADE_SUBMODE_3 == asyn_fade_info.cur_asyn_fade_submode)
+                    else
+                    {
+                        //  如果当前是子模式3
+                        tmp = 0x0B00;
+                    }
+
+                    asyn_fade_info.cur_asyn_fade_index = 0;
+                    tmp |= (((u16)table_asyn_fade[asyn_fade_info.cur_asyn_fade_index][0] << 8) | table_asyn_fade[asyn_fade_info.cur_asyn_fade_index][1]);
+                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                    send_cmd_16bit(tmp);
+
+                    asyn_fade_info.cur_asyn_fade_index = 1; // 按下speed按键，并且发送了对应的数据后，下一个数据帧从下标为1的位置开始发送
+
+                } // 发送按下SPEED按键后，对应的数据帧
+
+                asyn_fade_info.cur_asyn_fade_status = CUR_ASYN_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的 子模式 写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变 asyn_fade 模式的子模式
+
+            // 设置发送时间间隔：
+            if (CUR_ASYN_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME == asyn_fade_info.cur_asyn_fade_status)
+            {
+                /*
+                    asyn_fade 模式下
+                */
+                asyn_fade_info.delay_time = 4960; // 4.96s
+
+                // 设置完发送时间间隔后，进入等待模式
+                asyn_fade_info.cur_asyn_fade_status = CUR_ASYN_FADE_STATUS_STANDBY;
+            }
+            // if (CUR_ASYN_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME == asyn_fade_info.cur_asyn_fade_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_ASYN_FADE_STATUS_READY_TO_SEND == asyn_fade_info.cur_asyn_fade_status)
+            {
+                u16 tmp = ((u16)table_asyn_fade[asyn_fade_info.cur_asyn_fade_index][0] << 8) | table_asyn_fade[asyn_fade_info.cur_asyn_fade_index][1];
+
+                // 根据当前发送的数据帧下标，适配不同 子模式 下的数据：
+                if (CUR_ASYN_FADE_SUBMODE_0 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 子模式1
+                    tmp |= 0x0800;
+                }
+                else if (CUR_ASYN_FADE_SUBMODE_1 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 子模式2
+                    tmp |= 0x0A00;
+                }
+                else if (CUR_ASYN_FADE_SUBMODE_2 == asyn_fade_info.cur_asyn_fade_submode)
+                {
+                    // 子模式3
+                    tmp |= 0x0900;
+                }
+                // else if  (CUR_ASYN_FADE_SUBMODE_3 == asyn_fade_info.cur_asyn_fade_submode)
+                else
+                {
+                    // 子模式4
+                    tmp |= 0x0B00;
+                }
+
+                // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+                asyn_fade_info.cur_asyn_fade_index++;
+                if (asyn_fade_info.cur_asyn_fade_index >= ARRAY_SIZE(table_asyn_fade))
+                {
+                    // 如果下标越界
+                    asyn_fade_info.cur_asyn_fade_index = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                asyn_fade_info.cur_asyn_fade_status = CUR_ASYN_FADE_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+#endif // #if ENABLE_ASYN_FADE
+        } // else if (CUR_LED_STATUS_R6C4_ASYN_FADE == cur_led_status) // 如果当前处于 asyn_fade 模式
+        else if (CUR_LED_STATUS_R7C1_IN_WAVES == cur_led_status) // 如果当前处于 in_waves 模式
+        {
+#if ENABLE_IN_WAVES
+
+            // 检测是否有按下 SPEED，如果有按下，改变fade模式的发送时间间隔：
+            if (flag_is_press_speed)
+            {
+                u16 tmp;
+                flag_is_press_speed = 0;
+
+                in_waves_info.cur_in_waves_period++;
+                if (in_waves_info.cur_in_waves_period > CUR_IN_WAVES_PERIOD_3)
+                {
+                    in_waves_info.cur_in_waves_period = CUR_IN_WAVES_PERIOD_0;
+                }
+
+                if (CUR_IN_WAVES_PERIOD_0 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x8711;
+                }
+                else if (CUR_IN_WAVES_PERIOD_1 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x8611;
+                }
+                else if (CUR_IN_WAVES_PERIOD_2 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x8511;
+                }
+                // else if (CUR_IN_WAVES_PERIOD_3 == in_waves_info.cur_in_waves_period)
+                else
+                {
+                    tmp = 0x8411;
+                }
+
+                // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(tmp);
+
+                // 如果有按下 SPEED，切换数据发送周期，清空当前数据发送周期的计数
+                in_waves_info.cur_in_waves_index = 1;                                              // 按下speed按键，并且发送了对应的数据后，下一个数据帧从下标为1的位置开始发送
+                in_waves_info.cur_in_waves_status = CUR_IN_WAVES_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的发送周期写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变发送周期
+
+            // 设置发送时间间隔：
+            if (CUR_IN_WAVES_STATUS_PREPARE_TO_SET_DELAY_TIME == in_waves_info.cur_in_waves_status)
+            {
+                /*
+                    in_waves 模式下，各个发送周期
+                    5.557s
+                    4.56s
+                    3.36s
+                    2s
+                */
+
+                if (CUR_IN_WAVES_PERIOD_0 == in_waves_info.cur_in_waves_period)
+                {
+                    in_waves_info.delay_time = 5557;
+                }
+                else if (CUR_IN_WAVES_PERIOD_1 == in_waves_info.cur_in_waves_period)
+                {
+                    in_waves_info.delay_time = 4560;
+                }
+                else if (CUR_IN_WAVES_PERIOD_2 == in_waves_info.cur_in_waves_period)
+                {
+                    in_waves_info.delay_time = 3360;
+                }
+                // else if  (CUR_IN_WAVES_PERIOD_3 == in_waves_info.cur_in_waves_period)
+                else
+                {
+                    in_waves_info.delay_time = 2000;
+                }
+
+                // 设置完发送时间间隔后，进入等待模式
+                in_waves_info.cur_in_waves_status = CUR_IN_WAVES_STATUS_STANDBY;
+            }
+            // if (CUR_IN_WAVES_STATUS_PREPARE_TO_SET_DELAY_TIME == in_waves_info.cur_in_waves_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_IN_WAVES_STATUS_READY_TO_SEND == in_waves_info.cur_in_waves_status)
+            {
+                u16 tmp;
+                if (CUR_IN_WAVES_PERIOD_0 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x0700;
+                }
+                else if (CUR_IN_WAVES_PERIOD_1 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x0600;
+                }
+                else if (CUR_IN_WAVES_PERIOD_2 == in_waves_info.cur_in_waves_period)
+                {
+                    tmp = 0x0500;
+                }
+                // else if (CUR_IN_WAVES_PERIOD_3 == in_waves_info.cur_in_waves_period)
+                else
+                {
+                    tmp = 0x0400;
+                }
+
+                tmp |= ((u16)table_in_waves[in_waves_info.cur_in_waves_index][0] << 8) | table_in_waves[in_waves_info.cur_in_waves_index][1];
+
+                // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+
+                in_waves_info.cur_in_waves_index++;
+                if (in_waves_info.cur_in_waves_index >= ARRAY_SIZE(table_in_waves))
+                {
+                    // 如果下标越界
+                    in_waves_info.cur_in_waves_index = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                in_waves_info.cur_in_waves_status = CUR_IN_WAVES_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+
+#endif // #if ENABLE_IN_WAVES
+        } // else if (CUR_LED_STATUS_R7C1_IN_WAVES == cur_led_status) // 如果当前处于 in_waves 模式
+        else if (CUR_LED_STATUS_R7C2_STROBE == cur_led_status) // 如果当前处于 strobe 模式
+        {
+#if ENABLE_STROBE
+
+            // 检测是否有按下 SPEED，如果有按下，改变 strobe 模式的子模式：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                strobe_info.cur_strobe_submode++;
+                if (strobe_info.cur_strobe_submode > CUR_STROBE_SUBMODE_3)
+                {
+                    strobe_info.cur_strobe_submode = CUR_STROBE_SUBMODE_0;
+                }
+
+                { // 发送按下SPEED按键后，对应的数据帧
+                    u16 tmp;
+                    // 根据 strobe 当前的子模式，来区分当前发送的第4帧数据
+                    if (CUR_STROBE_SUBMODE_0 == strobe_info.cur_strobe_submode)
+                    {
+                        // 如果是 子模式0
+                        tmp = 0x0817;
+                    }
+                    else if (CUR_STROBE_SUBMODE_1 == strobe_info.cur_strobe_submode)
+                    {
+                        // 如果是 子模式1
+                        tmp = 0x0A17;
+                    }
+                    else if (CUR_STROBE_SUBMODE_2 == strobe_info.cur_strobe_submode)
+                    {
+                        // 如果是 子模式2
+                        tmp = 0x0917;
+                    }
+                    // else if (CUR_STROBE_SUBMODE_3 == strobe_info.cur_strobe_submode)
+                    else
+                    {
+                        // 如果是 子模式3
+                        tmp = 0x0B17;
+                    }
+
+                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                    send_cmd_16bit(tmp);
+                } // 发送按下SPEED按键后，对应的数据帧
+
+                strobe_info.cur_strobe_index = 1;
+                strobe_info.cur_strobe_status = CUR_STROBE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的子模式写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变auto模式的子模式
+
+            // 设置发送时间间隔：
+            if (CUR_STROBE_STATUS_PREPARE_TO_SET_DELAY_TIME == strobe_info.cur_strobe_status)
+            {
+                /*
+                    各个子模式的延时时间都是 4.96s
+                */
+                strobe_info.delay_time = 4960;
+
+                // 设置完发送时间间隔后，进入等待模式
+                strobe_info.cur_strobe_status = CUR_STROBE_STATUS_STANDBY;
+            }
+            // if (CUR_STROBE_STATUS_PREPARE_TO_SET_DELAY_TIME == strobe_info.cur_strobe_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_STROBE_STATUS_READY_TO_SEND == strobe_info.cur_strobe_status)
+            {
+                u16 tmp = ((u16)table_strobe[strobe_info.cur_strobe_index][0] << 8) | table_strobe[strobe_info.cur_strobe_index][1];
+
+                if (CUR_STROBE_SUBMODE_0 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式0
+                    tmp |= 0x0800;
+                }
+                else if (CUR_STROBE_SUBMODE_1 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式1
+                    tmp |= 0x0A00;
+                }
+                else if (CUR_STROBE_SUBMODE_2 == strobe_info.cur_strobe_submode)
+                {
+                    // 如果是 子模式2
+                    tmp |= 0x0900;
+                }
+                // else if (CUR_STROBE_SUBMODE_3 == strobe_info.cur_strobe_submode)
+                else
+                {
+                    // 如果是 子模式3
+                    tmp |= 0x0B00;
+                }
+
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+                strobe_info.cur_strobe_index++;
+                if (strobe_info.cur_strobe_index >= ARRAY_SIZE(table_strobe))
+                {
+                    // 如果下标越界
+                    strobe_info.cur_strobe_index = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                strobe_info.cur_strobe_status = CUR_STROBE_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+
+#endif // #if ENABLE_STROBE
+        } // else if (CUR_LED_STATUS_R7C2_STROBE == cur_led_status) // 如果当前处于 strobe 模式
+        else if (CUR_LED_STATUS_R7C3_TWINKLE == cur_led_status) // 如果当前处于 twinkle 模式
+        {
+#if ENABLE_TWINKLE
+
+            // 检测是否有按下 SPEED，如果有按下，改变fade模式的发送时间间隔：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                twinkle_info.cur_twinkle_period++;
+                if (twinkle_info.cur_twinkle_period > CUR_TWINKLE_PERIOD_3)
+                {
+                    twinkle_info.cur_twinkle_period = CUR_TWINKLE_PERIOD_0;
+                }
+
+                // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                send_cmd_16bit(0x0C00);
+                send_cmd_16bit(0x00EE);
+
+                // 如果有按下 SPEED，切换数据发送周期，清空当前数据发送周期的计数
+                twinkle_info.cur_twinkle_subindex = 1;                                          // 按下speed按键，并且发送了对应的数据后，下一个数据帧从下标为1的位置开始发送
+                twinkle_info.cur_twinkle_status = CUR_TWINKLE_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的发送周期写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变发送周期
+
+            // 设置发送时间间隔：
+            if (CUR_TWINKLE_STATUS_PREPARE_TO_SET_DELAY_TIME == twinkle_info.cur_twinkle_status)
+            {
+                /*
+                    twinkle 模式下，各个发送周期
+                    1.96s
+                    964ms
+                    465ms
+                    165ms
+                */
+
+                if (CUR_TWINKLE_PERIOD_0 == twinkle_info.cur_twinkle_period)
+                {
+                    twinkle_info.delay_time = 1960;
+                }
+                else if (CUR_TWINKLE_PERIOD_1 == twinkle_info.cur_twinkle_period)
+                {
+                    twinkle_info.delay_time = 964;
+                }
+                else if (CUR_TWINKLE_PERIOD_2 == twinkle_info.cur_twinkle_period)
+                {
+                    twinkle_info.delay_time = 465;
+                }
+                // else if  (CUR_TWINKLE_PERIOD_3== twinkle_info.cur_twinkle_period)
+                else
+                {
+                    twinkle_info.delay_time = 165;
+                }
+
+                // 设置完发送时间间隔后，进入等待模式
+                twinkle_info.cur_twinkle_status = CUR_TWINKLE_STATUS_STANDBY;
+            }
+            // if (CUR_TWINKLE_STATUS_PREPARE_TO_SET_DELAY_TIME == twinkle_info.cur_twinkle_status)
+            // 设置发送时间间隔
+
+            // 如果已经准备发送数据:
+            if (CUR_TWINKLE_STATUS_READY_TO_SEND == twinkle_info.cur_twinkle_status)
+            {
+                u16 tmp;
+                if (twinkle_info.cur_twinkle_subindex <= 9) // 当前循环的第0到9帧数据
+                {
+                    tmp = ((u16)table_twinkle[0][0] << 8) | table_twinkle[0][1];
+                }
+                else if (twinkle_info.cur_twinkle_subindex <= 19) // 当前循环的第10 ~ 19帧数据
+                {
+                    tmp = ((u16)table_twinkle[1][0] << 8) | table_twinkle[1][1];
+                }
+                else if (twinkle_info.cur_twinkle_subindex <= 29) // 当前循环的第20 ~ 29帧数据
+                {
+                    tmp = ((u16)table_twinkle[2][0] << 8) | table_twinkle[2][1];
+                }
+                else
+                {
+                    tmp = 0xFFFFF; // 要给一默认值，否则编译器会给出警告
+                }
+
+                // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+                send_cmd_16bit_without_delay(tmp);
+                // 发送完成后，下标加一
+
+                twinkle_info.cur_twinkle_subindex++;
+                if (twinkle_info.cur_twinkle_subindex >= 30)
+                {
+                    // 如果下标越界
+                    twinkle_info.cur_twinkle_subindex = 0;
+                }
+
+                // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                twinkle_info.cur_twinkle_status = CUR_TWINKLE_STATUS_PREPARE_TO_SET_DELAY_TIME;
+            }
+
+#endif // #if ENABLE_TWINKLE
+        } // else if (CUR_LED_STATUS_R7C3_TWINKLE == cur_led_status) // 如果当前处于 twinkle 模式
+        else if (CUR_LED_STATUS_R7C4_ASYN_JUMP == cur_led_status) // 如果当前处于 asyn_jump 模式
+        {
+#if ENABLE_ASYN_JUMP
+            // 检测是否有按下 SPEED，如果有按下，改变 asyn_jump 模式的子模式：
+            if (flag_is_press_speed)
+            {
+                flag_is_press_speed = 0;
+
+                asyn_jump_info.cur_asyn_jump_submode++;
+                if (asyn_jump_info.cur_asyn_jump_submode > CUR_ASYN_JUMP_SUBMODE_3)
+                {
+                    asyn_jump_info.cur_asyn_jump_submode = CUR_ASYN_JUMP_SUBMODE_0;
+                }
+
+                { // 发送按下SPEED按键后，对应的数据帧
+                    u16 tmp;
+                    // 根据 asyn_jump 当前的子模式，来区分当前发送的第2帧数据
+                    if (CUR_ASYN_JUMP_SUBMODE_0 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式0
+                        tmp = 0x08E0;
+                    }
+                    else if (CUR_ASYN_JUMP_SUBMODE_1 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式1
+                        tmp = 0x0AE0;
+                    }
+                    else if (CUR_ASYN_JUMP_SUBMODE_2 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式2
+                        tmp = 0x09E0;
+                    }
+                    // else if (CUR_ASYN_JUMP_SUBMODE_3 == asyn_jump_info.cur_asyn_jump_submode)
+                    else
+                    {
+                        // 如果是 子模式3
+                        tmp = 0x0BE0;
+                    }
+
+                    send_cmd_16bit(0x0C00); // 各个子模式下，检测到有SPEED按下，都是先发送这个
+                    send_cmd_16bit(tmp);
+                } // 发送按下SPEED按键后，对应的数据帧
+
+                asyn_jump_info.cur_asyn_jump_index = 1;
+                asyn_jump_info.cur_asyn_jump_status = CUR_ASYN_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME; // 按下SPEED后，要重新设置一次发送时间间隔
+
+                // 将对应的子模式写回EEPROM ========================================
+
+                delay_ms(2); // 等待定时器清空相应的变量
+            } // if (flag_is_press_speed)
+            // 检测是否有按下 SPEED，如果有按下，改变 asyn_jump 模式的子模式
+
+            // 设置发送时间间隔：
+            if (CUR_ASYN_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME == asyn_jump_info.cur_asyn_jump_status)
+            {
+                /*
+                    asyn_jump 模式下，各个发送周期都相等
+                */
+                asyn_jump_info.delay_time = 4960;
+
+                // 设置完发送时间间隔后，进入等待模式
+                asyn_jump_info.cur_asyn_jump_status = CUR_ASYN_JUMP_STATUS_STANDBY;
+            }
+
+            if (CUR_ASYN_JUMP_STATUS_READY_TO_SEND == asyn_jump_info.cur_asyn_jump_status)
+            // 设置发送时间间隔
+            {
+                // 如果已经准备发送数据:
+                if (CUR_ASYN_JUMP_STATUS_READY_TO_SEND == asyn_jump_info.cur_asyn_jump_status)
+                {
+                    u16 tmp = ((u16)table_asyn_jump[asyn_jump_info.cur_asyn_jump_index][0] << 8) | table_asyn_jump[asyn_jump_info.cur_asyn_jump_index][1];
+                    if (CUR_ASYN_JUMP_SUBMODE_0 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式0
+                        tmp |= 0x0800;
+                    }
+                    else if (CUR_ASYN_JUMP_SUBMODE_1 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式1
+                        tmp |= 0x0A00;
+                    }
+                    else if (CUR_ASYN_JUMP_SUBMODE_2 == asyn_jump_info.cur_asyn_jump_submode)
+                    {
+                        // 如果是 子模式2
+                        tmp |= 0x0900;
+                    }
+                    // else if (CUR_ASYN_JUMP_SUBMODE_3 == asyn_jump_info.cur_asyn_jump_submode)
+                    else
+                    {
+                        // 如果是 子模式3
+                        tmp |= 0x0B00;
+                    }
+
+                    // 根据当前发送的数据帧下标，适配子模式的各个不同的数据：
+                    send_cmd_16bit_without_delay(tmp);
+                    // 发送完成后，下标加一
+
+                    asyn_jump_info.cur_asyn_jump_index++;
+                    if (asyn_jump_info.cur_asyn_jump_index >= ARRAY_SIZE(table_asyn_jump))
+                    {
+                        // 如果下标越界
+                        asyn_jump_info.cur_asyn_jump_index = 0;
+                    }
+
+                    // （还未确认要不要放到前面，可能要上机实际测试）这一语句要放到较前面，至少要放到发送前面，因为样机的发送时间间隔是从发送帧那一刻开始到下一帧的起始位置:
+                    asyn_jump_info.cur_asyn_jump_status = CUR_ASYN_JUMP_STATUS_PREPARE_TO_SET_DELAY_TIME;
+                }
+            }
+
+#endif // #if ENABLE_ASYN_JUMP
+        } // else if (CUR_LED_STATUS_R7C4_ASYN_JUMP == cur_led_status) // 如果当前处于 asyn_jump 模式
+        else
+        {
+            flag_is_press_speed = 0;
         }
 
     } // while (1)
@@ -882,44 +1905,6 @@ void int_isr(void) __interrupt
                 last_level_in_ir_pin = 0; // 表示接收到的是低电平
             }
         } // 红外解码
-
-        { // 1ms进入一次
-            static u8 cnt_100us;
-            cnt_100us++;
-            if (cnt_100us >= 10) // 如果计满 1ms
-            {
-                cnt_100us = 0;
-
-                { // AUTO 模式下，控制发送数据的周期
-                    static u16 auto_period_cnt;
-                    if (cur_led_status == CUR_LED_STATUS_AUTO) // 如果当前处于 AUTO 模式
-                    {
-                        u8 flag_is_period_arrive; // 周期是否到来的标志位
-                        auto_period_cnt++;
-                        // if ((cur_auto_period == CUR_AUTO_PERIOD_3S && auto_period_cnt >= 3000) ||
-                        //     (cur_auto_period == CUR_AUTO_PERIOD_10S && auto_period_cnt >= 10000) ||
-                        //     (cur_auto_period == CUR_AUTO_PERIOD_7_5S && auto_period_cnt >= 7500) ||
-                        //     (cur_auto_period == CUR_AUTO_PERIOD_5S && auto_period_cnt >= 5000))
-                        // {
-                        //     flag_is_period_arrive = 1;
-                        // }
-                        // else // 计数周期未到来：
-                        // {
-                        //     flag_is_period_arrive = 0;
-                        // }
-
-                        if (flag_is_period_arrive) // 如果到了发送数据的周期
-                        {
-                        }
-                    }
-                    else // 不处于 AUTO 模式
-                    {
-                        auto_period_cnt = 0;
-                    }
-                } // AUTO 模式下，控制发送数据的周期
-            }
-
-        } // 1ms进入一次
     }
     //=======T3========================
     if (T3IF & T3IE)
@@ -929,6 +1914,7 @@ void int_isr(void) __interrupt
 
         if (CUR_LED_STATUS_AUTO == cur_led_status) // 如果当前处于AUTO模式
         {
+#if ENABLE_AUTO
             if (CUR_SUBMODE_STATUS_STANDBY == auto_mode_info.cur_submode_status) // 如果正在等待发送时间间隔
             {
                 if (auto_mode_info.delay_time > 0)
@@ -942,6 +1928,133 @@ void int_isr(void) __interrupt
                     auto_mode_info.cur_submode_status = CUR_SUBMODE_STATUS_READY_TO_SEND;
                 }
             }
+#endif // #if ENABLE_AUTO
+        } // if (CUR_LED_STATUS_AUTO == cur_led_status) // 如果当前处于AUTO模式
+        else if (CUR_LED_STATUS_R4C4_FADE == cur_led_status) // 如果当前处于 fade 模式
+        {
+#if ENABLE_FADE
+            if (CUR_FADE_STATUS_STANDBY == fade_info.cur_fade_status) // 如果正在等待发送时间间隔
+            {
+                if (fade_info.delay_time > 0)
+                {
+                    fade_info.delay_time--;
+                }
+
+                if (fade_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    fade_info.cur_fade_status = CUR_FADE_STATUS_READY_TO_SEND;
+                }
+            }
+#endif
+        } // else if (CUR_LED_STATUS_R4C4_FADE == cur_led_status) // 如果当前处于 fade 模式
+        else if (CUR_LED_STATUS_R5C4_JUMP == cur_led_status) // 如果当前处于 jump 模式
+        {
+#if ENABLE_JUMP
+            if (CUR_JUMP_STATUS_STANDBY == jump_info.cur_jump_status) // 如果正在等待发送时间间隔
+            {
+                if (jump_info.delay_time > 0)
+                {
+                    jump_info.delay_time--;
+                }
+
+                if (jump_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    jump_info.cur_jump_status = CUR_JUMP_STATUS_READY_TO_SEND;
+                }
+            }
+#endif
+        } // else if (CUR_LED_STATUS_R4C4_FADE == cur_led_status) // 如果当前处于 fade 模式
+        else if (CUR_LED_STATUS_R6C4_ASYN_FADE == cur_led_status) // 如果当前处于 asyn_fade 模式
+        {
+#if ENABLE_ASYN_FADE
+            if (CUR_ASYN_FADE_STATUS_STANDBY == asyn_fade_info.cur_asyn_fade_status) // 如果正在等待发送时间间隔
+            {
+                if (asyn_fade_info.delay_time > 0)
+                {
+                    asyn_fade_info.delay_time--;
+                }
+
+                if (asyn_fade_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    asyn_fade_info.cur_asyn_fade_status = CUR_ASYN_FADE_STATUS_READY_TO_SEND;
+                }
+            }
+#endif // #if ENABLE_ASYN_FADE
+        }
+        else if (CUR_LED_STATUS_R7C1_IN_WAVES == cur_led_status) // 如果当前处于 in_waves 模式
+        {
+#if ENABLE_IN_WAVES
+            if (CUR_IN_WAVES_STATUS_STANDBY == in_waves_info.cur_in_waves_status) // 如果正在等待发送时间间隔
+            {
+                if (in_waves_info.delay_time > 0)
+                {
+                    in_waves_info.delay_time--;
+                }
+
+                if (in_waves_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    in_waves_info.cur_in_waves_status = CUR_IN_WAVES_STATUS_READY_TO_SEND;
+                }
+            }
+#endif // #if ENABLE_IN_WAVES
+        }
+        else if (CUR_LED_STATUS_R7C2_STROBE == cur_led_status) // 如果当前处于 strobe 模式
+        {
+#if ENABLE_STROBE
+            if (CUR_STROBE_STATUS_STANDBY == strobe_info.cur_strobe_status) // 如果正在等待发送时间间隔
+            {
+                if (strobe_info.delay_time > 0)
+                {
+                    strobe_info.delay_time--;
+                }
+
+                if (strobe_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    strobe_info.cur_strobe_status = CUR_STROBE_STATUS_READY_TO_SEND;
+                }
+            }
+#endif //  #if ENABLE_STROBE
+        }
+        else if (CUR_LED_STATUS_R7C3_TWINKLE == cur_led_status) // 如果当前处于 twinkle 模式
+        {
+#if ENABLE_TWINKLE
+            if (CUR_TWINKLE_STATUS_STANDBY == twinkle_info.cur_twinkle_status) // 如果正在等待发送时间间隔
+            {
+                if (twinkle_info.delay_time > 0)
+                {
+                    twinkle_info.delay_time--;
+                }
+
+                if (twinkle_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    twinkle_info.cur_twinkle_status = CUR_TWINKLE_STATUS_READY_TO_SEND;
+                }
+            }
+#endif //  #if ENABLE_TWINKLE
+        }
+        else if (CUR_LED_STATUS_R7C4_ASYN_JUMP == cur_led_status) // 如果当前处于 asyn_jump 模式
+        {
+#if ENABLE_ASYN_JUMP
+            if (CUR_ASYN_JUMP_STATUS_STANDBY == asyn_jump_info.cur_asyn_jump_status) // 如果正在等待发送时间间隔
+            {
+                if (asyn_jump_info.delay_time > 0)
+                {
+                    asyn_jump_info.delay_time--;
+                }
+
+                if (asyn_jump_info.delay_time == 0)
+                {
+                    // 如果等待发送间隔的倒计时结束
+                    asyn_jump_info.cur_asyn_jump_status = CUR_ASYN_JUMP_STATUS_READY_TO_SEND;
+                }
+            }
+#endif //  #if ENABLE_ASYN_JUMP
         }
     }
     __asm;
