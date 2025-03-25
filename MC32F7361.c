@@ -439,6 +439,10 @@ const u8 main_table[] = {
     [88] = 0x33, /* R6C1 */
     [89] = 0x66, /* R6C2 */
     [90] = 0x55, /* R6C3 */
+
+    [91] = 0xEE,
+    [92] = 0xAA, 
+    [93] = 0xCC,
 };
 
 // FADE
@@ -536,10 +540,10 @@ const u16 section_5_delay_table[4] = {
 #define SECTION_7_START (MODE_IN_WAVES_START)
 #define SECTION_7_END (MODE_IN_WAVES_END)
 const u8 section_7_speed_table[4] = {
-    0x07,
-    0x06,
-    0x05,
-    0x04,
+    0x87,
+    0x86,
+    0x85,
+    0x84, 
 };
 const u16 section_7_delay_table[4] = {
     5557,
@@ -713,15 +717,15 @@ void main(void)
                     current_static = 0;
                 case 0:
                     // 这里直接用 main_table[] 中已有的数据 0x00EE
-                    key_event_same_deal(29, 29, 0xFFFF, 0xFFFF);
+                    key_event_same_deal(91, 91, 0xFFFF, 0xFFFF);
                     break;
                 case 1:
                     // 这里直接用 main_table[] 中已有的数据 0x00AA
-                    key_event_same_deal(39, 39, 0xFFFF, 0xFFFF);
+                    key_event_same_deal(92, 92, 0xFFFF, 0xFFFF);
                     break;
                 case 2:
                     // 这里直接用 main_table[] 中已有的数据 0x00CC
-                    key_event_same_deal(49, 49, 0xFFFF, 0xFFFF);
+                    key_event_same_deal(93, 93, 0xFFFF, 0xFFFF);
                     break;
                 }
                 break;
@@ -937,17 +941,17 @@ void main(void)
                     speed_code = section_7_speed_table[current_speed];
                     next_frame_delay = section_7_delay_table[current_speed];
                 }
-                else if (current_index >= SECTION_8_START && current_index <= SECTION_8_END)
-                {
-                    // speed_code = section_8_speed_table[current_speed];
-                    // next_frame_delay = section_8_delay_table[current_speed];
-                    next_frame_delay = 0xFFFF;
-                    speed_code = 0x00;
+                // else if (current_index >= SECTION_8_START && current_index <= SECTION_8_END)
+                // {
+                //     // speed_code = section_8_speed_table[current_speed];
+                //     // next_frame_delay = section_8_delay_table[current_speed];
+                //     next_frame_delay = 0xFFFF;
+                //     speed_code = 0x00;
 
-                    // next_frame_delay = 0xFFFF;
-                    // send_cmd_16bit_without_delay(XXXX);
-                    // continue;
-                }
+                //     // next_frame_delay = 0xFFFF;
+                //     // send_cmd_16bit_without_delay(XXXX);
+                //     // continue;
+                // }
                 else if (current_index >= SECTION_9_START && current_index <= SECTION_9_END)
                 {
                     // speed_code = section_9_speed_table[current_speed];
@@ -957,6 +961,11 @@ void main(void)
                     speed_code = 0x10;
                     // send_cmd_16bit_without_delay(XXXX);
                     // continue;
+                }
+                else
+                {
+                    next_frame_delay = 0xFFFF;
+                    speed_code = 0x00;
                 }
 
                 speed_code <<= 8;
