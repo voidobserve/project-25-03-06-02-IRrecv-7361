@@ -1,55 +1,87 @@
 /******************************************************************************
-;  *       @ĞÍºÅ                 : MC32F7361
-;  *       @´´½¨ÈÕÆÚ             : 2021.12.21
-;  *       @¹«Ë¾/×÷Õß            : SINOMCU-FAE
-;  *       @êÉÎùÎ¢¼¼ÊõÖ§³Ö       : 2048615934
-;  *       @êÉÎùÎ¢¹ÙÍø           : http://www.sinomcu.com/
-;  *       @°æÈ¨                 : 2021 SINOMCU¹«Ë¾°æÈ¨ËùÓĞ.
-;  *----------------------ÕªÒªÃèÊö---------------------------------
-;  *                ¶¨Ê±Æ÷
-;  *                T0   P10 2mS·­×ª
-;  *                T1   P11 1mS·­×ª
-;  *                T2   P12 100uS·­×ª
-;  *                T3   P14 50uS·­×ª
+;  *       @å‹å·                 : MC32F7361
+;  *       @åˆ›å»ºæ—¥æœŸ             : 2021.12.21
+;  *       @å…¬å¸/ä½œè€…            : SINOMCU-FAE
+;  *       @æ™ŸçŸ½å¾®æŠ€æœ¯æ”¯æŒ       : 2048615934
+;  *       @æ™ŸçŸ½å¾®å®˜ç½‘           : http://www.sinomcu.com/
+;  *       @ç‰ˆæƒ                 : 2021 SINOMCUå…¬å¸ç‰ˆæƒæ‰€æœ‰.
+;  *----------------------æ‘˜è¦æè¿°---------------------------------
+;  *                å®šæ—¶å™¨
+;  *                T0   P10 2mSç¿»è½¬
+;  *                T1   P11 1mSç¿»è½¬
+;  *                T2   P12 100uSç¿»è½¬
+;  *                T3   P14 50uSç¿»è½¬
 ******************************************************************************/
 
 #include "user.h"
 
-// 100usÑÓÊ±£¬Ç°ÌáÌõ¼ş £º FCPU = FHOSC / 4
-void delay_100us(void)
-{
-    u8 i = 74;
-    while (i--)
-    {
-        Nop();
-    }
-}
+// u8 time_set_temp_index;
+// u8 auto_item_start_index;
+// u8 auto_item_end_index;
 
-// 200usÑÓÊ±£¬Ç°ÌáÌõ¼ş £º FCPU = FHOSC / 4
-void delay_200us(void)
-{
-    u8 i = 150;
-    while (i--)
-    {
-        Nop();
-    }
-}
+// // 100uså»¶æ—¶ï¼Œå‰ææ¡ä»¶ ï¼š FCPU = FHOSC / 4
+// void delay_100us(void)
+// {
+//     u8 i = 74;
+//     while (i--)
+//     {
+//         Nop();
+//     }
+// }
 
-// 1.4msÑÓÊ±
-void delay_1_4ms(void)
+// // 200uså»¶æ—¶ï¼Œå‰ææ¡ä»¶ ï¼š FCPU = FHOSC / 4
+// void delay_200us(void)
+// {
+//     u8 i = 150;
+//     while (i--)
+//     {
+//         Nop();
+//     }
+// }
+
+// // 1.4mså»¶æ—¶
+// void delay_1_4ms(void)
+// {
+//     u8 i;
+//     for (i = 0; i < 14; i++)
+//     {
+//         delay_100us();
+//     }
+// }
+
+void delay_100xus(u8 i)
 {
-    u8 i;
-    for (i = 0; i < 14; i++)
+    u8 j;
+    while (i)
     {
-        delay_100us();
+        j = 74;
+        while (j)
+        {
+            Nop();
+            j--;
+        }
+        i--;
     }
 }
+#define delay_100us() delay_100xus(1)
+#define delay_200us() delay_100xus(2)
+#define delay_1_4ms() delay_100xus(14)
+// #define delay_1ms()     delay_100xus(10)
+// #define delay_2ms()     delay_100xus(20)
+// #define delay_3ms()     delay_100xus(30)
+// #define delay_4ms()     delay_100xus(40)
+// #define delay_5ms()     delay_100xus(50)
+// #define delay_7ms()     delay_100xus(70)
+// #define delay_10ms()    delay_100xus(100)
+// #define delay_33ms()    delay_100xus(330)
+// #define delay_40ms()    delay_100xus(400)
+// #define delay_51ms()    delay_100xus(510)
 
 /************************************************
-;  *    @º¯ÊıÃû            : EEPROM_Write_Byte
-;  *    @ËµÃ÷              : ÄÚ²¿EEPROMĞ´2¸ö×Ö½Ú
-;  *    @ÊäÈë²ÎÊı          : µØÖ·  Êı¾İ
-;  *    @·µ»Ø²ÎÊı          :
+;  *    @å‡½æ•°å            : EEPROM_Write_Byte
+;  *    @è¯´æ˜              : å†…éƒ¨EEPROMå†™2ä¸ªå­—èŠ‚
+;  *    @è¾“å…¥å‚æ•°          : åœ°å€  æ•°æ®
+;  *    @è¿”å›å‚æ•°          :
 ;  ***********************************************/
 void EEPROM_Write_Byte(uint8_t addr, uint16_t data)
 {
@@ -59,41 +91,41 @@ void EEPROM_Write_Byte(uint8_t addr, uint16_t data)
     EEDRL = data & 0xff;
     GIE = 0;
     EEPR = 0x5A;
-    EEPR = 0xA5; // ½â³ı±£»¤
-    EECR = 0x01; // Æô¶¯EEPROM¶ÁĞ´  Ğ´Êı¾İ²Ù×÷
+    EEPR = 0xA5; // è§£é™¤ä¿æŠ¤
+    EECR = 0x01; // å¯åŠ¨EEPROMè¯»å†™  å†™æ•°æ®æ“ä½œ
     Nop();
     Nop();
-    while (EEWRITE) // ¼ì²é EE Ğ´²Ù×÷ÊÇ·ñÍê³É
+    while (EEWRITE) // æ£€æŸ¥ EE å†™æ“ä½œæ˜¯å¦å®Œæˆ
     {
-        // ClrWdt();                      //Çå¿´ÃÅ¹·
+        // ClrWdt();                      //æ¸…çœ‹é—¨ç‹—
     }
     GIE = 1;
 }
 /************************************************
-;  *    @º¯ÊıÃû            : EEPROM_Read_Byte
-;  *    @ËµÃ÷              : ÄÚ²¿EEPROM¶Á2¸ö×Ö½Ú
-;  *    @ÊäÈë²ÎÊı          : µØÖ·
-;  *    @·µ»Ø²ÎÊı          : ¶Áµ½µÄÄÚÈİ
+;  *    @å‡½æ•°å            : EEPROM_Read_Byte
+;  *    @è¯´æ˜              : å†…éƒ¨EEPROMè¯»2ä¸ªå­—èŠ‚
+;  *    @è¾“å…¥å‚æ•°          : åœ°å€
+;  *    @è¿”å›å‚æ•°          : è¯»åˆ°çš„å†…å®¹
 ;  ***********************************************/
 uint16_t EEPROM_Read_Byte(u8 addr)
 {
     uint16_t EEDR;
     EEAR = addr;
-    EECR = 0x02; // Æô¶¯ EE ¶Á²Ù×÷
+    EECR = 0x02; // å¯åŠ¨ EE è¯»æ“ä½œ
     Nop();
     Nop();
-    while (EEREAD) // ¼ì²é EE Ğ´²Ù×÷ÊÇ·ñÍê³É
+    while (EEREAD) // æ£€æŸ¥ EE å†™æ“ä½œæ˜¯å¦å®Œæˆ
     {
-        // ClrWdt();                      //Çå¿´ÃÅ¹·
+        // ClrWdt();                      //æ¸…çœ‹é—¨ç‹—
     }
     EEDR = (EEDRH << 8) | EEDRL;
     return EEDR;
 }
 /************************************************
-;  *    @º¯ÊıÃû            : EEPROM_Write_Data
-;  *    @ËµÃ÷              : Á¬ĞøĞ´Èë
-;  *    @ÊäÈë²ÎÊı          :
-;  *    @·µ»Ø²ÎÊı          :
+;  *    @å‡½æ•°å            : EEPROM_Write_Data
+;  *    @è¯´æ˜              : è¿ç»­å†™å…¥
+;  *    @è¾“å…¥å‚æ•°          :
+;  *    @è¿”å›å‚æ•°          :
 ;  ***********************************************/
 // void EEPROM_Write_Data(u8 addr, u16 *data, u8 len)
 // {
@@ -104,7 +136,7 @@ uint16_t EEPROM_Read_Byte(u8 addr)
 //     }
 // }
 
-// ·¢ËÍ16Î»µÄ¿ØÖÆÃüÁî£¬Ã¿¸ö16Î»µÄ¿ØÖÆÃüÁî·¢ËÍºó£¬º¯ÊıÄÚ²¿»áÑÓÊ±33ms
+// å‘é€16ä½çš„æ§åˆ¶å‘½ä»¤ï¼Œæ¯ä¸ª16ä½çš„æ§åˆ¶å‘½ä»¤å‘é€åï¼Œå‡½æ•°å†…éƒ¨ä¼šå»¶æ—¶33ms
 void send_cmd_16bit(const u16 data)
 {
     u8 i;
@@ -113,17 +145,17 @@ void send_cmd_16bit(const u16 data)
     //     return;
     // }
 
-#if 1 // ¿ØÖÆ½Å°´ÕÕÑù»úµÄ²¨ĞÎ½øĞĞ·´ÏàÊä³ö
+#if 1 // æ§åˆ¶è„šæŒ‰ç…§æ ·æœºçš„æ³¢å½¢è¿›è¡Œåç›¸è¾“å‡º
     for (i = 0; i < 16; i++)
     {
         LED_CTL_PIN = 0;
         delay_100us();
         LED_CTL_PIN = 1;
-        if ((data >> (15 - i)) & 0x01) // Èç¹ûÊÇÂß¼­1
+        if ((data >> (15 - i)) & 0x01) // å¦‚æœæ˜¯é€»è¾‘1
         {
             delay_ms(3);
         }
-        else // Èç¹ûÊÇÂß¼­0
+        else // å¦‚æœæ˜¯é€»è¾‘0
         {
             delay_1_4ms();
         }
@@ -133,125 +165,165 @@ void send_cmd_16bit(const u16 data)
     delay_100us();
     LED_CTL_PIN = 1;
     delay_ms(33);
-#endif // ¿ØÖÆ½Å°´ÕÕÑù»úµÄ²¨ĞÎ½øĞĞ·´ÏàÊä³ö
+#endif // æ§åˆ¶è„šæŒ‰ç…§æ ·æœºçš„æ³¢å½¢è¿›è¡Œåç›¸è¾“å‡º
 }
 
-// ·¢ËÍ16Î»µÄ¿ØÖÆÃüÁî£¬Ã¿¸ö16Î»µÄ¿ØÖÆÃüÁî·¢ËÍºó£¬º¯ÊıÄÚ²¿²»»áÑÓÊ±
-void send_cmd_16bit_without_delay(const u16 data)
-{
-    u8 i;
-    // if (0 == flag_is_dev_open)
-    // {
-    //     return;
-    // }
+// å‘é€16ä½çš„æ§åˆ¶å‘½ä»¤ï¼Œæ¯ä¸ª16ä½çš„æ§åˆ¶å‘½ä»¤å‘é€åï¼Œå‡½æ•°å†…éƒ¨ä¸ä¼šå»¶æ—¶
+// void send_cmd_16bit_without_delay(const u16 data)
+// {
+//     u8 i;
+//     // if (0 == flag_is_dev_open)
+//     // {
+//     //     return;
+//     // }
 
-#if 1 // ¿ØÖÆ½Å°´ÕÕÑù»úµÄ²¨ĞÎ½øĞĞ·´ÏàÊä³ö
-    for (i = 0; i < 16; i++)
-    {
-        LED_CTL_PIN = 0;
-        delay_100us();
-        LED_CTL_PIN = 1;
-        if ((data >> (15 - i)) & 0x01) // Èç¹ûÊÇÂß¼­1
-        {
-            delay_ms(3);
-        }
-        else // Èç¹ûÊÇÂß¼­0
-        {
-            delay_1_4ms();
-        }
-    }
+// #if 1 // æ§åˆ¶è„šæŒ‰ç…§æ ·æœºçš„æ³¢å½¢è¿›è¡Œåç›¸è¾“å‡º
+//     for (i = 0; i < 16; i++)
+//     {
+//         LED_CTL_PIN = 0;
+//         delay_100us();
+//         LED_CTL_PIN = 1;
+//         if ((data >> (15 - i)) & 0x01) // å¦‚æœæ˜¯é€»è¾‘1
+//         {
+//             delay_ms(3);
+//         }
+//         else // å¦‚æœæ˜¯é€»è¾‘0
+//         {
+//             delay_1_4ms();
+//         }
+//     }
 
-    LED_CTL_PIN = 0;
-    delay_100us();
-    LED_CTL_PIN = 1;
-#endif // ¿ØÖÆ½Å°´ÕÕÑù»úµÄ²¨ĞÎ½øĞĞ·´ÏàÊä³ö
-}
+//     LED_CTL_PIN = 0;
+//     delay_100us();
+//     LED_CTL_PIN = 1;
+// #endif // æ§åˆ¶è„šæŒ‰ç…§æ ·æœºçš„æ³¢å½¢è¿›è¡Œåç›¸è¾“å‡º
+// }
 
 /************************************************
-;  *    @º¯ÊıÃû          : CLR_RAM
-;  *    @ËµÃ÷            : ÇåRAM
-;  *    @ÊäÈë²ÎÊı        :
-;  *    @·µ»Ø²ÎÊı        :
+;  *    @å‡½æ•°å          : CLR_RAM
+;  *    @è¯´æ˜            : æ¸…RAM
+;  *    @è¾“å…¥å‚æ•°        :
+;  *    @è¿”å›å‚æ•°        :
 ;  ***********************************************/
-void CLR_RAM(void)
-{
-    for (FSR0 = 0; FSR0 < 0xff; FSR0++)
-    {
-        INDF0 = 0x00;
-    }
-    FSR0 = 0xFF;
-    INDF0 = 0x00;
-}
+// void CLR_RAM(void)
+// {
+//     for (FSR0 = 0; FSR0 < 0xff; FSR0++)
+//     {
+//         INDF0 = 0x00;
+//     }
+//     FSR0 = 0xFF;
+//     INDF0 = 0x00;
+// }
 /************************************************
-;  *    @º¯ÊıÃû            : IO_Init
-;  *    @ËµÃ÷              : IO³õÊ¼»¯
-;  *    @ÊäÈë²ÎÊı          :
-;  *    @·µ»Ø²ÎÊı          :
+;  *    @å‡½æ•°å            : IO_Init
+;  *    @è¯´æ˜              : IOåˆå§‹åŒ–
+;  *    @è¾“å…¥å‚æ•°          :
+;  *    @è¿”å›å‚æ•°          :
 ;  ***********************************************/
-void IO_Init(void)
-{
-    IOP0 = 0x00;   // io¿ÚÊı¾İÎ»
-    OEP0 = 0x3F;   // io¿Ú·½Ïò 1:out  0:in
-    PUP0 = 0x00;   // io¿ÚÉÏÀ­µç×è   1:enable  0:disable
-    PDP0 = 0x00;   // io¿ÚÏÂÀ­µç×è   1:enable  0:disable
-    P0ADCR = 0x00; // ioÀàĞÍÑ¡Ôñ  1:Ä£ÄâÊäÈë  0:Í¨ÓÃio
+// void IO_Init(void)
+// {
+//     IOP0 = 0x00;   // ioå£æ•°æ®ä½
+//     OEP0 = 0x3F;   // ioå£æ–¹å‘ 1:out  0:in
+//     PUP0 = 0x00;   // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+//     PDP0 = 0x00;   // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disable
+//     P0ADCR = 0x00; // ioç±»å‹é€‰æ‹©  1:æ¨¡æ‹Ÿè¾“å…¥  0:é€šç”¨io
 
-    IOP1 = 0x00;   // io¿ÚÊı¾İÎ»
-    OEP1 = 0xFF;   // io¿Ú·½Ïò 1:out  0:in
-    PUP1 = 0x00;   // io¿ÚÉÏÀ­µç×è   1:enable  0:disable
-    PDP1 = 0x00;   // io¿ÚÏÂÀ­µç×è   1:enable  0:disable
-    P1ADCR = 0x00; // ioÀàĞÍÑ¡Ôñ  1:Ä£ÄâÊäÈë  0:Í¨ÓÃio
+//     IOP1 = 0x00;   // ioå£æ•°æ®ä½
+//     OEP1 = 0xFF;   // ioå£æ–¹å‘ 1:out  0:in
+//     PUP1 = 0x00;   // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+//     PDP1 = 0x00;   // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disable
+//     P1ADCR = 0x00; // ioç±»å‹é€‰æ‹©  1:æ¨¡æ‹Ÿè¾“å…¥  0:é€šç”¨io
 
-    IOP2 = 0x00; // io¿ÚÊı¾İÎ»
-    OEP2 = 0x0F; // io¿Ú·½Ïò 1:out  0:in
-    PUP2 = 0x00; // io¿ÚÉÏÀ­µç×è   1:enable  0:disable
-    PDP2 = 0x00; // io¿ÚÏÂÀ­µç×è   1:enable  0:disablea
+//     IOP2 = 0x00; // ioå£æ•°æ®ä½
+//     OEP2 = 0x0F; // ioå£æ–¹å‘ 1:out  0:in
+//     PUP2 = 0x00; // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+//     PDP2 = 0x00; // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disablea
 
-    PMOD = 0x00;  // P00¡¢P01¡¢P13 io¶Ë¿ÚÖµ´Ó¼Ä´æÆ÷¶Á£¬ÍÆÍìÊä³ö
-    DRVCR = 0x80; // ÆÕÍ¨Çı¶¯
-}
+//     PMOD = 0x00;  // P00ã€P01ã€P13 ioç«¯å£å€¼ä»å¯„å­˜å™¨è¯»ï¼Œæ¨æŒ½è¾“å‡º
+//     DRVCR = 0x80; // æ™®é€šé©±åŠ¨
+// }
 
 /************************************************
-;  *    @º¯ÊıÃû            : TIMER2_INT_Init
-;  *    @ËµÃ÷              : ¶¨Ê±Æ÷2³õÊ¼»¯
-;  *    @ÊäÈë²ÎÊı          :
-;  *    @·µ»Ø²ÎÊı          :
+;  *    @å‡½æ•°å            : TIMER2_INT_Init
+;  *    @è¯´æ˜              : å®šæ—¶å™¨2åˆå§‹åŒ–
+;  *    @è¾“å…¥å‚æ•°          :
+;  *    @è¿”å›å‚æ•°          :
 ;  ***********************************************/
-void TIMER2_INT_Init(void)
-{
-    T2CR = DEF_SET_BIT0 | DEF_SET_BIT1; // CPU,8·ÖÆµ
-    T2CNT = 100 - 1;
-    T2LOAD = 100 - 1; // 100us
-    T2EN = 1;
-    T2IE = 1;
-}
+// void TIMER2_INT_Init(void)
+// {
+//     T2CR = DEF_SET_BIT0 | DEF_SET_BIT1; // CPU,8åˆ†é¢‘
+//     T2CNT = 100 - 1;
+//     T2LOAD = 100 - 1; // 100us
+//     T2EN = 1;
+//     T2IE = 1;
+// }
 
-void TIMER3_INT_Init(void)
-{
-    T3LOAD = 135 - 1;                               // ·ÖÆµºó£¬ÕâÀïÊÇ1ms´¥·¢Ò»´ÎÖĞ¶Ï£¨ÓÃ¼ÆËã³öÀ´µÄÖµ»áÓĞÎó²î£¬ÕâÀï¼ÓÉÏÁËÒ»Ğ©²¹³¥£©
-    T3CR = (0x01 << 7) | (0x01 << 2) | (0x01 << 1); // Ê¹ÄÜ¶¨Ê±Æ÷£¬Ê±ÖÓÔ´Ñ¡ÔñFCPU£¬64·ÖÆµ
-    T3IE = 1;
-}
+// void TIMER3_INT_Init(void)
+// {
+//     T3LOAD = 135 - 1;                               // åˆ†é¢‘åï¼Œè¿™é‡Œæ˜¯1msè§¦å‘ä¸€æ¬¡ä¸­æ–­ï¼ˆç”¨è®¡ç®—å‡ºæ¥çš„å€¼ä¼šæœ‰è¯¯å·®ï¼Œè¿™é‡ŒåŠ ä¸Šäº†ä¸€äº›è¡¥å¿ï¼‰
+//     T3CR = (0x01 << 7) | (0x01 << 2) | (0x01 << 1); // ä½¿èƒ½å®šæ—¶å™¨ï¼Œæ—¶é’Ÿæºé€‰æ‹©FCPUï¼Œ64åˆ†é¢‘
+//     T3IE = 1;
+// }
 /************************************************
-;  *    @º¯ÊıÃû            : Sys_Init
-;  *    @ËµÃ÷              : ÏµÍ³³õÊ¼»¯
-;  *    @ÊäÈë²ÎÊı          :
-;  *    @·µ»Ø²ÎÊı          :
+;  *    @å‡½æ•°å            : Sys_Init
+;  *    @è¯´æ˜              : ç³»ç»Ÿåˆå§‹åŒ–
+;  *    @è¾“å…¥å‚æ•°          :
+;  *    @è¿”å›å‚æ•°          :
 ;  ***********************************************/
 void Sys_Init(void)
 {
     GIE = 0;
-    CLR_RAM();
-    IO_Init();
+    // CLR_RAM();
+    {
+        for (FSR0 = 0; FSR0 < 0xff; FSR0++)
+        {
+            INDF0 = 0x00;
+        }
+        FSR0 = 0xFF;
+        INDF0 = 0x00;
+    }
+    // IO_Init();
+    {
+        IOP0 = 0x00;   // ioå£æ•°æ®ä½
+        OEP0 = 0x3F;   // ioå£æ–¹å‘ 1:out  0:in
+        PUP0 = 0x00;   // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+        PDP0 = 0x00;   // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disable
+        P0ADCR = 0x00; // ioç±»å‹é€‰æ‹©  1:æ¨¡æ‹Ÿè¾“å…¥  0:é€šç”¨io
+
+        IOP1 = 0x00;   // ioå£æ•°æ®ä½
+        OEP1 = 0xFF;   // ioå£æ–¹å‘ 1:out  0:in
+        PUP1 = 0x00;   // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+        PDP1 = 0x00;   // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disable
+        P1ADCR = 0x00; // ioç±»å‹é€‰æ‹©  1:æ¨¡æ‹Ÿè¾“å…¥  0:é€šç”¨io
+
+        IOP2 = 0x00; // ioå£æ•°æ®ä½
+        OEP2 = 0x0F; // ioå£æ–¹å‘ 1:out  0:in
+        PUP2 = 0x00; // ioå£ä¸Šæ‹‰ç”µé˜»   1:enable  0:disable
+        PDP2 = 0x00; // ioå£ä¸‹æ‹‰ç”µé˜»   1:enable  0:disablea
+
+        PMOD = 0x00;  // P00ã€P01ã€P13 ioç«¯å£å€¼ä»å¯„å­˜å™¨è¯»ï¼Œæ¨æŒ½è¾“å‡º
+        DRVCR = 0x80; // æ™®é€šé©±åŠ¨
+    }
     // TIMER0_INT_Init();
     // TIMER1_INT_Init();
-    TIMER2_INT_Init();
-    TIMER3_INT_Init();
+    // TIMER2_INT_Init();
+    {
+        T2CR = DEF_SET_BIT0 | DEF_SET_BIT1; // CPU,8åˆ†é¢‘
+        T2CNT = 100 - 1;
+        T2LOAD = 100 - 1; // 100us
+        T2EN = 1;
+        T2IE = 1;
+    }
+    // TIMER3_INT_Init();
+
+    LED_4H_PIN = LED_TIM_PIN_OFF;
+    LED_6H_PIN = LED_TIM_PIN_OFF;
+    LED_8H_PIN = LED_TIM_PIN_OFF;
     GIE = 1;
 }
 
 /* DEFINE */
-/// TODO:Ìî³äÃ¿¸öÄ£Ê½µÄstartºÍendµÄË÷Òı
+/// TODO:å¡«å……æ¯ä¸ªæ¨¡å¼çš„startå’Œendçš„ç´¢å¼•
 #define MODE_AUTO_START (0)
 #define MODE_AUTO_END (74)
 #define MODE_FADE_START (0)
@@ -317,19 +389,25 @@ enum
 };
 
 /* params */
-volatile u8 current_index;     // µ±Ç°¶¯»­Ë÷Òı
-volatile u8 start_index;       // µ±Ç°¶¯»­¿ªÊ¼Ë÷Òı
-volatile u8 end_index;         // µ±Ç°¶¯»­½áÊøË÷Òı
-volatile u16 next_frame_delay; // ÏÂ´Î½øÈë±äÉ«µÄ³¬Ê±Öµ
+volatile u8 current_index;     // å½“å‰åŠ¨ç”»ç´¢å¼•
+volatile u8 start_index;       // å½“å‰åŠ¨ç”»å¼€å§‹ç´¢å¼•
+volatile u8 end_index;         // å½“å‰åŠ¨ç”»ç»“æŸç´¢å¼•
+volatile u16 next_frame_delay; // ä¸‹æ¬¡è¿›å…¥å˜è‰²çš„è¶…æ—¶å€¼
 
-volatile u8 power_sta;              // ¿ª¹Ø×´Ì¬
-volatile u8 current_speed;          // ËÙ¶ÈÖµ
-volatile u8 current_static;         // µ±Ç°¾²Ì¬Ä£Ê½
-volatile u8 cur_mechanical_key_sta; // »úĞµ°´¼ü¶ÔÓ¦µÄÄ£Ê½
+volatile u8 power_sta;              // å¼€å…³çŠ¶æ€
+volatile u8 current_speed;          // é€Ÿåº¦å€¼
+volatile u8 current_static;         // å½“å‰é™æ€æ¨¡å¼
+volatile u8 cur_mechanical_key_sta; // æœºæ¢°æŒ‰é”®å¯¹åº”çš„æ¨¡å¼
 
 volatile u32 timer_count = 0;
 
-/// TODO:Ìî³äÏÂÃæµÄËùÓĞconst tableÊı¾İºÍ¶ÎµÄstartºÍendÖµ
+// æ¯æ¬¡å†™EEPROMåï¼Œä¼šæ›´æ–°ä¸‹é¢å››ä¸ªå˜é‡ï¼š
+volatile u8 eeprom_read_byte_index_0;
+volatile u8 eeprom_read_byte_index_1;
+volatile u8 eeprom_read_byte_index_2;
+volatile u8 eeprom_read_byte_index_3;
+
+/// TODO:å¡«å……ä¸‹é¢çš„æ‰€æœ‰const tableæ•°æ®å’Œæ®µçš„startå’Œendå€¼
 const u8 main_table[] = {
 
     // FADE
@@ -370,7 +448,7 @@ const u8 main_table[] = {
     [28] = 0xC0, //
 
     // TWINKLE
-    [29] = 0xEE, //   // ×¢ÒâÃ¿Ò»Ö¡Òª·¢ËÍ10´Î
+    [29] = 0xEE, //   // æ³¨æ„æ¯ä¸€å¸§è¦å‘é€10æ¬¡
     [30] = 0xEE, //
     [31] = 0xEE, //
     [32] = 0xEE, //
@@ -380,7 +458,7 @@ const u8 main_table[] = {
     [36] = 0xEE, //
     [37] = 0xEE, //
     [38] = 0xEE, //
-    [39] = 0xAA, //   // ×¢ÒâÃ¿Ò»Ö¡Òª·¢ËÍ10´Î
+    [39] = 0xAA, //   // æ³¨æ„æ¯ä¸€å¸§è¦å‘é€10æ¬¡
     [40] = 0xAA, //
     [41] = 0xAA, //
     [42] = 0xAA, //
@@ -390,7 +468,7 @@ const u8 main_table[] = {
     [46] = 0xAA, //
     [47] = 0xAA, //
     [48] = 0xAA, //
-    [49] = 0xCC, //  // ×¢ÒâÃ¿Ò»Ö¡Òª·¢ËÍ10´Î
+    [49] = 0xCC, //  // æ³¨æ„æ¯ä¸€å¸§è¦å‘é€10æ¬¡
     [50] = 0xCC, //
     [51] = 0xCC, //
     [52] = 0xCC, //
@@ -441,7 +519,7 @@ const u8 main_table[] = {
     [90] = 0x55, /* R6C3 */
 
     [91] = 0xEE,
-    [92] = 0xAA, 
+    [92] = 0xAA,
     [93] = 0xCC,
 };
 
@@ -465,9 +543,9 @@ const u16 section_1_delay_table[4] = {
 // JUMP
 #define SECTION_2_START (MODE_JUMP_START)
 #define SECTION_2_END (MODE_JUMP_END)
-const u8 section_2_speed_table[4] = {
-    0x00,
-};
+// const u8 section_2_speed_table[4] = {
+//     0x00,
+// };
 const u16 section_2_delay_table[4] = {
     1960,
     964,
@@ -543,7 +621,7 @@ const u8 section_7_speed_table[4] = {
     0x87,
     0x86,
     0x85,
-    0x84, 
+    0x84,
 };
 const u16 section_7_delay_table[4] = {
     5557,
@@ -577,110 +655,226 @@ const u16 section_7_delay_table[4] = {
 /**
  * @brief
  *
- * @param start Êı¾İÔÚÊı×éÖĞµÄÆğÊ¼Î»ÖÃ
- * @param end  Êı¾İÔÚÊı×éÖĞµÄ½áÊøÎ»ÖÃ
- * @param own_data1  Èç¹û×Ü¹²ÓĞËÄÖ¡Êı¾İÒª·¢ËÍ£¬ÕâÀïÊÇ´ı·¢ËÍµÄµÚ¶şÖ¡Êı¾İ£¬²»·¢ËÍÔòÌî 0xFFFF
- * @param own_data2  Èç¹û×Ü¹²ÓĞËÄÖ¡Êı¾İÒª·¢ËÍ£¬ÕâÀïÊÇ´ı·¢ËÍµÄµÚÈıÖ¡Êı¾İ£¬²»·¢ËÍÔòÌî 0xFFFF
+ * @param start æ•°æ®åœ¨æ•°ç»„ä¸­çš„èµ·å§‹ä½ç½®
+ * @param end  æ•°æ®åœ¨æ•°ç»„ä¸­çš„ç»“æŸä½ç½®
+ * @param own_data1  å¦‚æœæ€»å…±æœ‰å››å¸§æ•°æ®è¦å‘é€ï¼Œè¿™é‡Œæ˜¯å¾…å‘é€çš„ç¬¬äºŒå¸§æ•°æ®ï¼Œä¸å‘é€åˆ™å¡« 0xFFFF
+ * @param own_data2  å¦‚æœæ€»å…±æœ‰å››å¸§æ•°æ®è¦å‘é€ï¼Œè¿™é‡Œæ˜¯å¾…å‘é€çš„ç¬¬ä¸‰å¸§æ•°æ®ï¼Œä¸å‘é€åˆ™å¡« 0xFFFF
  */
-void key_event_same_deal(u8 start, u8 end, u16 own_data1, u16 own_data2)
+// void key_event_same_deal(u8 start, u8 end, u16 own_data1, u16 own_data2)
+#define key_event_same_deal(start, end, own_data1, own_data2) key_event_same_deal_ex(start, end, own_data1)
+void key_event_same_deal_ex(u8 start, u8 end, u16 own_data1)
 {
+    // ä¿å­˜å½“å‰æ•ˆæœä¿¡æ¯
+    EEPROM_Write_Byte(0, start);
+    EEPROM_Write_Byte(1, end);
+    EEPROM_Write_Byte(2, own_data1);
+    // EEPROM_Write_Byte(3, own_data1);
+    EEPROM_Write_Byte(4, 0xA5A5);
+
+    eeprom_read_byte_index_0 = start;
+    eeprom_read_byte_index_1 = end;
+    eeprom_read_byte_index_2 = own_data1;
+    // eeprom_read_byte_index_3 = own_data1;
+
     if (power_sta == POWER_STA_ON)
     {
         start_index = start;
         end_index = end;
 
-        // ±£´æµ±Ç°Ğ§¹ûĞÅÏ¢
-        EEPROM_Write_Byte(0, start);
-        EEPROM_Write_Byte(1, end);
-        EEPROM_Write_Byte(2, own_data1);
-        EEPROM_Write_Byte(3, own_data2);
-        EEPROM_Write_Byte(4, 0xA5A5);
+        // ä¿å­˜å½“å‰æ•ˆæœä¿¡æ¯
+        // EEPROM_Write_Byte(0, start);
+        // EEPROM_Write_Byte(1, end);
+        // EEPROM_Write_Byte(2, own_data1);
+        // EEPROM_Write_Byte(3, own_data1);
+        // EEPROM_Write_Byte(4, 0xA5A5);
 
         send_cmd_16bit(0x0C00);
+        // if (own_data1 != 0xFFFF)
+        //     send_cmd_16bit(own_data1);
+        // if (own_data2 != 0xFFFF)
+        //     send_cmd_16bit(own_data2);
         if (own_data1 != 0xFFFF)
+        {
             send_cmd_16bit(own_data1);
-        if (own_data2 != 0xFFFF)
-            send_cmd_16bit(own_data2);
+            send_cmd_16bit(own_data1);
+        }
 
-        current_index = start_index; // ´ÓµÚÒ»Ö¡¿ªÊ¼
-        next_frame_delay = 0;        // Á¢¿Ì·¢ËÍµÚÒ»Ö¡²¨ĞÎ
+        current_index = start_index; // ä»ç¬¬ä¸€å¸§å¼€å§‹
+        next_frame_delay = 0;        // ç«‹åˆ»å‘é€ç¬¬ä¸€å¸§æ³¢å½¢
     }
     else if (power_sta == POWER_STA_OFF)
     {
-        // ±£´æµ±Ç°Ğ§¹ûĞÅÏ¢
-        EEPROM_Write_Byte(0, start);
-        EEPROM_Write_Byte(1, end);
-        EEPROM_Write_Byte(2, own_data1);
-        EEPROM_Write_Byte(3, own_data2);
-        EEPROM_Write_Byte(4, 0xA5A5);
+        // ä¿å­˜å½“å‰æ•ˆæœä¿¡æ¯
+        // EEPROM_Write_Byte(0, start);
+        // EEPROM_Write_Byte(1, end);
+        // EEPROM_Write_Byte(2, own_data1);
+        // EEPROM_Write_Byte(3, own_data2);
+        // EEPROM_Write_Byte(4, 0xA5A5);
         power_sta = POWER_STA_PRE_ON;
     }
+}
+
+void key_event_set_timer(void)
+{
+    key_event_same_deal(eeprom_read_byte_index_0, eeprom_read_byte_index_1, eeprom_read_byte_index_2, eeprom_read_byte_index_3);
+
+    LED_4H_PIN = LED_TIM_PIN_OFF;
+    LED_6H_PIN = LED_TIM_PIN_OFF;
+    LED_8H_PIN = LED_TIM_PIN_OFF;
+
+    // if (eeprom_read_byte_index_0 == MODE_AUTO_START)
+    // {
+    //     current_index = auto_item_start_index;
+    // }
 }
 
 void main(void)
 {
     Sys_Init();
-    delay_ms(1); // µÈ´ıÏµÍ³ÎÈ¶¨
+    delay_ms(1); // ç­‰å¾…ç³»ç»Ÿç¨³å®š
 
-// ºìÍâĞÅºÅ½ÓÊÕÒı½Å£º
+// çº¢å¤–ä¿¡å·æ¥æ”¶å¼•è„šï¼š
 #if USE_MY_DEBUG
 
     P21PU = 1;
     P21OE = 0;
 
-    // // ÔÚÑù°åÉÏµÄ½ÅÎ»£º
+    // // åœ¨æ ·æ¿ä¸Šçš„è„šä½ï¼š
     // P16PU = 1;
     // P16OE = 0;
 
 #else
 
-    // P15PU = 1; // ÉÏÀ­
-    P15OE = 0; // ÊäÈëÄ£Ê½
+    // P15PU = 1; // ä¸Šæ‹‰
+    P15OE = 0; // è¾“å…¥æ¨¡å¼
 
 #endif
 
-    // °´¼ü¼ì²âÒı½Å£º
-    // P16PU = 1; // ÉÏÀ­
-    P16OE = 0; // ÊäÈëÄ£Ê½
+    // æŒ‰é”®æ£€æµ‹å¼•è„šï¼š
+    // P16PU = 1; // ä¸Šæ‹‰
+    P16OE = 0; // è¾“å…¥æ¨¡å¼
 
     // flag_is_dev_open = 1;
 
-    // ´ÓEEPROMÖĞ¶ÁÈ¡Êı¾İ
+    // ä»EEPROMä¸­è¯»å–æ•°æ®
     if (EEPROM_Read_Byte(4) != 0xA5A5)
     {
-        // ±£´æµ±Ç°Ğ§¹ûĞÅÏ¢
+        // ä¿å­˜å½“å‰æ•ˆæœä¿¡æ¯
         key_event_same_deal(MODE_AUTO_START, MODE_AUTO_END, 0x9645, 0x9645);
     }
     else
-    { 
+    {
         power_sta = POWER_STA_PRE_ON;
     }
 
     while (1)
     {
-        // »úĞµ°´¼üÉ¨Ãè
-        // if (0 == MECHANICAL_KEYING_PIN)
-        // {
-        //     u8 i;
-        //     u8 cnt = 0;
-        //     for (i = 0; i < 200; i++)
-        //     {
-        //         if (0 == MECHANICAL_KEYING_PIN)
-        //         {
-        //             cnt++;
-        //         }
-        //         delay_ms(1);
-        //     }
-
-        //     if (cnt >= 180)
-        //     {
-        //         flag_is_press_mechanical_keying = 1;
-        //     }
-        // }
-
         // - key deal
         if (flag_is_recved_data)
         {
+            if (ir_type)
+            {
+                ir_type = 0;
+                switch (ir_data)
+                {
+                case 0x08:
+                    ir_data = 0x38;
+                    break;
+                case 0xC0:
+                    ir_data = 0xB8;
+                    break;
+                case 0x80:
+                    ir_data = 0x78;
+                    break;
+                case 0x60:
+                    ir_data = 0xF8;
+                    break;
+                case 0x90:
+                    ir_data = 0x00;
+                    break;
+                case 0xB8:
+                    ir_data = 0x80;
+                    break;
+                case 0xF8:
+                    ir_data = 0x40;
+                    break;
+                case 0xB0:
+                    ir_data = 0xC0;
+                    break;
+                case 0x98:
+                    ir_data = 0x20;
+                    break;
+                case 0xD8:
+                    ir_data = 0xA0;
+                    break;
+                case 0x88:
+                    ir_data = 0x60;
+                    break;
+                case 0xA8:
+                    ir_data = 0xE0;
+                    break;
+                case 0xE8:
+                    ir_data = 0x10;
+                    break;
+                case 0x48:
+                    ir_data = 0x90;
+                    break;
+                case 0x68:
+                    ir_data = 0x50;
+                    break;
+                case 0xB2:
+                    ir_data = 0xD0;
+                    break;
+                case 0x02:
+                    ir_data = 0x30;
+                    break;
+                case 0x32:
+                    ir_data = 0xB0;
+                    break;
+                case 0x20:
+                    ir_data = 0x70;
+                    break;
+                case 0x00:
+                    ir_data = 0xF0;
+                    break;
+                case 0x50:
+                    ir_data = 0x08;
+                    break;
+                case 0x78:
+                    ir_data = 0x88;
+                    break;
+                case 0x70:
+                    ir_data = 0x48;
+                    break;
+                case 0x58:
+                    ir_data = 0xC8;
+                    break;
+                case 0x38:
+                    ir_data = 0x28;
+                    break;
+                case 0x28:
+                    ir_data = 0xA8;
+                    break;
+                case 0xF0:
+                    ir_data = 0x68;
+                    break;
+                case 0x30:
+                    ir_data = 0xE8;
+                    break;
+                case 0x40:
+                    ir_data = 0x18;
+                    break;
+                case 0x12:
+                    ir_data = 0x98;
+                    break;
+                case 0x2A:
+                    ir_data = 0x58;
+                    break;
+                case 0xA0:
+                    ir_data = 0xD8;
+                    break;
+                }
+            }
             switch (ir_data)
             {
             case IR_KEY_ON:
@@ -689,11 +883,13 @@ void main(void)
 
             case IR_KEY_OFF:
                 power_sta = POWER_STA_PRE_OFF;
+                cur_mechanical_key_sta = 0;
                 break;
 
             case IR_KEY_AUTO:
                 key_event_same_deal(MODE_AUTO_START, MODE_AUTO_END, 0x9645, 0x9645);
                 // cur_led_status = CUR_LED_STATUS_AUTO;
+                cur_mechanical_key_sta = 0;
                 break;
 
             case IR_KEY_SPEED:
@@ -702,53 +898,70 @@ void main(void)
                     current_speed++;
                     if (current_speed >= 4)
                         current_speed = 0;
-                    current_index = start_index; // ´ÓµÚÒ»Ö¡¿ªÊ¼
-                    next_frame_delay = 0;        // Á¢¿Ì·¢ËÍµÚÒ»Ö¡²¨ĞÎ
+                    current_index = start_index; // ä»ç¬¬ä¸€å¸§å¼€å§‹
+                    next_frame_delay = 0;        // ç«‹åˆ»å‘é€ç¬¬ä¸€å¸§æ³¢å½¢
                     send_cmd_16bit(0x0C00);
                 }
                 break;
 
             case IR_KEY_R3C4:
+#if 0
                 current_static++;
                 switch (current_static)
                 {
-                    /// TODO: ĞèÒª°´Ä£Ê½ÊıÁ¿Ìí¼Ócase£¬°´Ã¿¸öcaseÓ¦¸ÃÏÔÊ¾µÄÑÕÉ«À´ĞŞ¸Äº¯Êı²ÎÊı
+                    /// TODO: éœ€è¦æŒ‰æ¨¡å¼æ•°é‡æ·»åŠ caseï¼ŒæŒ‰æ¯ä¸ªcaseåº”è¯¥æ˜¾ç¤ºçš„é¢œè‰²æ¥ä¿®æ”¹å‡½æ•°å‚æ•°
                 default:
                     current_static = 0;
                 case 0:
-                    // ÕâÀïÖ±½ÓÓÃ main_table[] ÖĞÒÑÓĞµÄÊı¾İ 0x00EE
+                    // è¿™é‡Œç›´æ¥ç”¨ main_table[] ä¸­å·²æœ‰çš„æ•°æ® 0x00EE
                     key_event_same_deal(91, 91, 0xFFFF, 0xFFFF);
                     break;
                 case 1:
-                    // ÕâÀïÖ±½ÓÓÃ main_table[] ÖĞÒÑÓĞµÄÊı¾İ 0x00AA
+                    // è¿™é‡Œç›´æ¥ç”¨ main_table[] ä¸­å·²æœ‰çš„æ•°æ® 0x00AA
                     key_event_same_deal(92, 92, 0xFFFF, 0xFFFF);
                     break;
                 case 2:
-                    // ÕâÀïÖ±½ÓÓÃ main_table[] ÖĞÒÑÓĞµÄÊı¾İ 0x00CC
+                    // è¿™é‡Œç›´æ¥ç”¨ main_table[] ä¸­å·²æœ‰çš„æ•°æ® 0x00CC
                     key_event_same_deal(93, 93, 0xFFFF, 0xFFFF);
                     break;
                 }
+#else
+                current_static++;
+                if (current_static > 2)
+                    current_static = 0;
+                key_event_same_deal(91 + current_static, 91 + current_static, 0xFFFF, 0xFFFF);
+#endif
+
+                cur_mechanical_key_sta = 0;
                 break;
 
             case IR_MECHANICAL_KEYING:
                 switch (cur_mechanical_key_sta)
                 {
-                    /// TODO: ĞèÒª°´Ä£Ê½ÊıÁ¿Ìí¼Ócase£¬°´Ã¿¸öcaseÓ¦¸ÃÏÔÊ¾µÄÑÕÉ«À´ĞŞ¸Äº¯Êı²ÎÊı
+                    /// TODO: éœ€è¦æŒ‰æ¨¡å¼æ•°é‡æ·»åŠ caseï¼ŒæŒ‰æ¯ä¸ªcaseåº”è¯¥æ˜¾ç¤ºçš„é¢œè‰²æ¥ä¿®æ”¹å‡½æ•°å‚æ•°
                 default:
                     cur_mechanical_key_sta = 0;
                 case 0: // AUTO
                     key_event_same_deal(MODE_AUTO_START, MODE_AUTO_END, 0x9645, 0x9645);
                     break;
-                case 1: // ºì
+#if 0
+                case 1: // çº¢
                     key_event_same_deal(MODE_R2C1_START, MODE_R2C1_END, 0xFFFF, 0xFFFF);
                     break;
-                case 2: // ÂÌ
+                case 2: // ç»¿
                     key_event_same_deal(MODE_R2C2_START, MODE_R2C2_END, 0xFFFF, 0xFFFF);
                     break;
-                case 3: // À¶
+                case 3: // è“
                     key_event_same_deal(MODE_R2C3_START, MODE_R2C3_END, 0xFFFF, 0xFFFF);
                     break;
-                case 4: // °×
+#else
+                case 1: // çº¢
+                case 2: // ç»¿
+                case 3: // è“
+                    key_event_same_deal(76 + cur_mechanical_key_sta, 76 + cur_mechanical_key_sta, 0xFFFF, 0xFFFF);
+                    break;
+#endif
+                case 4: // ç™½
                     key_event_same_deal(MODE_R2C4_START, MODE_R2C4_END, 0x9645, 0x9645);
                     break;
                 case 5: // FADE
@@ -757,7 +970,6 @@ void main(void)
                 case 6: // JUMP
                     key_event_same_deal(MODE_JUMP_START, MODE_JUMP_END, 0x9645, 0x9645);
                     break;
-
                 case 7: // ASYN_FADE
                     key_event_same_deal(MODE_ASYN_FADE_START, MODE_ASYN_FADE_END, 0x9645, 0x9645);
                     break;
@@ -785,105 +997,154 @@ void main(void)
                 break;
             case IR_KEY_R4C4_FADE:
                 key_event_same_deal(MODE_FADE_START, MODE_FADE_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R4C4_FADE;
+                cur_mechanical_key_sta = 5;
                 break;
 
             case IR_KEY_R5C4_JUMP:
                 key_event_same_deal(MODE_JUMP_START, MODE_JUMP_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R5C4_JUMP;
+                cur_mechanical_key_sta = 6;
                 break;
 
             case IR_KEY_R6C4_ASYN_FADE:
                 key_event_same_deal(MODE_ASYN_FADE_START, MODE_ASYN_FADE_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R6C4_ASYN_FADE;
+                cur_mechanical_key_sta = 7;
                 break;
 
             case IR_KEY_R7C1_IN_WAVES:
                 key_event_same_deal(MODE_IN_WAVES_START, MODE_IN_WAVES_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R7C1_IN_WAVES;
+                cur_mechanical_key_sta = 11;
                 break;
 
             case IR_KEY_R7C2_STROBE:
                 key_event_same_deal(MODE_STROBE_START, MODE_STROBE_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R7C2_STROBE;
+                cur_mechanical_key_sta = 10;
                 break;
 
             case IR_KEY_R7C3_TWINKLE:
                 key_event_same_deal(MODE_TWINKLE_START, MODE_TWINKLE_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R7C3_TWINKLE;
+                cur_mechanical_key_sta = 9;
                 break;
 
             case IR_KEY_R7C4_ASYN_JUMP:
                 key_event_same_deal(MODE_ASYN_JUMP_START, MODE_ASYN_JUMP_END, 0x9645, 0x9645);
-                // cur_led_status = CUR_LED_STATUS_R7C4_ASYN_JUMP;
+                cur_mechanical_key_sta = 8;
                 break;
 
             case IR_KEY_R2C1:
                 key_event_same_deal(MODE_R2C1_START, MODE_R2C1_END, 0xFFFF, 0xFFFF);
-                // cur_led_status = CUR_LED_STATUS_R2C1_RED;
+                cur_mechanical_key_sta = 1;
                 break;
             case IR_KEY_R2C2:
                 key_event_same_deal(MODE_R2C2_START, MODE_R2C2_END, 0xFFFF, 0xFFFF);
-                // cur_led_status = CUR_LED_STATUS_R2C2_GREEN;
+                cur_mechanical_key_sta = 2;
                 break;
             case IR_KEY_R2C3:
                 key_event_same_deal(MODE_R2C3_START, MODE_R2C3_END, 0xFFFF, 0xFFFF);
-                // cur_led_status = CUR_LED_STATUS_R2C3_BLUE;
+                cur_mechanical_key_sta = 3;
                 break;
             case IR_KEY_R2C4:
                 key_event_same_deal(MODE_R2C4_START, MODE_R2C4_END, 0x9645, 0x9645);
+                cur_mechanical_key_sta = 4;
                 break;
             case IR_KEY_R3C1:
                 key_event_same_deal(MODE_R3C1_START, MODE_R3C1_END, 0x9F00, 0x9F00);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R3C2:
                 key_event_same_deal(MODE_R3C2_START, MODE_R3C2_END, 0x90F1, 0x90F1);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R3C3:
                 key_event_same_deal(MODE_R3C3_START, MODE_R3C3_END, 0x930F, 0x930F);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R4C1:
                 key_event_same_deal(MODE_R4C1_START, MODE_R4C1_END, 0x9F10, 0x9F10);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R4C2:
                 key_event_same_deal(MODE_R4C2_START, MODE_R4C2_END, 0x90F8, 0x90F8);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R4C3:
                 key_event_same_deal(MODE_R4C3_START, MODE_R4C3_END, 0x980F, 0x980F);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R5C1:
                 key_event_same_deal(MODE_R5C1_START, MODE_R5C1_END, 0x9F30, 0x9F30);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R5C2:
                 key_event_same_deal(MODE_R5C2_START, MODE_R5C2_END, 0x90FC, 0x90FC);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R5C3:
                 key_event_same_deal(MODE_R5C3_START, MODE_R5C3_END, 0x9F0F, 0x9F0F);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R6C1:
                 key_event_same_deal(MODE_R6C1_START, MODE_R6C1_END, 0x9FF0, 0x9FF0);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R6C2:
                 key_event_same_deal(MODE_R6C2_START, MODE_R6C2_END, 0x90FF, 0x90FF);
+                cur_mechanical_key_sta = 0;
                 break;
             case IR_KEY_R6C3:
                 key_event_same_deal(MODE_R6C3_START, MODE_R6C3_END, 0x9F03, 0x9F03);
+                cur_mechanical_key_sta = 0;
                 break;
 
             case IR_KEY_4H:
                 timer_count = 4 * 60 * 60 * 1000;
-                // timer_count = 4 * 1000; // ²âÊÔÓÃ
+                // timer_count = 4 * 1000; // æµ‹è¯•ç”¨
+#if 0
+                // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
+                key_event_same_deal(eeprom_read_byte_index_0, eeprom_read_byte_index_1, eeprom_read_byte_index_2, eeprom_read_byte_index_3);
+                LED_6H_PIN = LED_TIM_PIN_OFF;
+                LED_8H_PIN = LED_TIM_PIN_OFF;
+#else
+                key_event_set_timer();
+#endif
+                LED_4H_PIN = LED_TIM_PIN_ON;
                 break;
             case IR_KEY_6H:
                 timer_count = 6 * 60 * 60 * 1000;
-                // timer_count = 6 * 1000; // ²âÊÔÓÃ
+                // timer_count = 6 * 1000; // æµ‹è¯•ç”¨
+#if 0
+                // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
+                key_event_same_deal(eeprom_read_byte_index_0, eeprom_read_byte_index_1, eeprom_read_byte_index_2, eeprom_read_byte_index_3);
+                LED_4H_PIN = LED_TIM_PIN_OFF;
+                LED_8H_PIN = LED_TIM_PIN_OFF;
+#else
+                key_event_set_timer();
+#endif
+                LED_6H_PIN = LED_TIM_PIN_ON;
                 break;
             case IR_KEY_8H:
                 timer_count = 8 * 60 * 60 * 1000;
-                // timer_count = 8 * 1000; // ²âÊÔÓÃ
+                // timer_count = 8 * 1000; // æµ‹è¯•ç”¨
+#if 0
+                // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
+                key_event_same_deal(eeprom_read_byte_index_0, eeprom_read_byte_index_1, eeprom_read_byte_index_2, eeprom_read_byte_index_3);
+                LED_4H_PIN = LED_TIM_PIN_OFF;
+                LED_6H_PIN = LED_TIM_PIN_OFF;
+#else
+                key_event_set_timer();
+#endif
+                LED_8H_PIN = LED_TIM_PIN_ON;
                 break;
             case IR_KEY_TIME_OFF:
                 timer_count = 0;
+#if 0
+                // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
+                key_event_same_deal(eeprom_read_byte_index_0, eeprom_read_byte_index_1, eeprom_read_byte_index_2, eeprom_read_byte_index_3);
+                LED_4H_PIN = LED_TIM_PIN_OFF;
+                LED_6H_PIN = LED_TIM_PIN_OFF;
+                LED_8H_PIN = LED_TIM_PIN_OFF;
+#else
+                key_event_set_timer();
+#endif
                 break;
             }
 
@@ -895,51 +1156,71 @@ void main(void)
         if (power_sta == POWER_STA_ON)
         {
             // - animation
-            if (next_frame_delay == 0) // ³¬Ê±ÁË£¬Ó¦¸Ã·¢ËÍÖ¡Êı¾İ
+            if (next_frame_delay == 0) // è¶…æ—¶äº†ï¼Œåº”è¯¥å‘é€å¸§æ•°æ®
             {
-                u16 speed_code;
+                u16 speed_code = 0x00;
 
-                if (current_index >= SECTION_1_START && current_index <= SECTION_1_END) // ·Ö¶ÎÀ´»ñÈ¡¸÷×ÔµÄËÙ¶ÈcodeºÍÖ¡¼ä¸ôÊ±¼ä
+                next_frame_delay = 0xFFFF;
+
+                if (current_index >= SECTION_1_START && current_index <= SECTION_1_END) // åˆ†æ®µæ¥è·å–å„è‡ªçš„é€Ÿåº¦codeå’Œå¸§é—´éš”æ—¶é—´
                 {
-                    speed_code = section_1_speed_table[current_speed];       // »ñÈ¡ËÙ¶Ècode
-                    next_frame_delay = section_1_delay_table[current_speed]; // »ñÈ¡²¢ÉèÖÃ±¾Ö¡µ½ÏÂÖ¡Ö®¼äµÄÑÓÊ±Ê±¼ä
+                    speed_code = section_1_speed_table[current_speed];       // è·å–é€Ÿåº¦code
+                    next_frame_delay = section_1_delay_table[current_speed]; // è·å–å¹¶è®¾ç½®æœ¬å¸§åˆ°ä¸‹å¸§ä¹‹é—´çš„å»¶æ—¶æ—¶é—´
+
+                    // auto_item_start_index = MODE_FADE_START;
                 }
                 else if (current_index >= SECTION_2_START && current_index <= SECTION_2_END)
                 {
-                    speed_code = section_2_speed_table[current_speed];
+                    // speed_code = section_2_speed_table[current_speed];
                     next_frame_delay = section_2_delay_table[current_speed];
+
+                    // auto_item_start_index = MODE_JUMP_START;
                 }
-                else if (current_index >= SECTION_3_START && current_index <= SECTION_3_END)
+                else if ((current_index >= SECTION_3_START &&                                  /*current_index <= SECTION_3_END) ||
+                                                          (current_index >= SECTION_4_START &&*/ current_index <= SECTION_4_END) ||
+                         (current_index >= SECTION_6_START && current_index <= SECTION_6_END)) // è¿™äº›æ¨¡å¼ä¸‹ï¼ŒåŒ…å«é€Ÿåº¦çš„æ•°æ®å¸§å’Œå‘é€å¸§çš„æ—¶é—´é—´éš”éƒ½ä¸€æ ·
+                // else if (current_index >= SECTION_3_START && current_index <= SECTION_3_END)
                 {
                     speed_code = section_3_speed_table[current_speed];
                     // next_frame_delay = section_3_delay_table[current_speed];
                     next_frame_delay = 4960;
+
+                    // if (current_index <= SECTION_3_END)
+                    //     auto_item_start_index = MODE_ASYN_FADE_START;
+                    // else if (current_index <= SECTION_4_END)
+                    //     auto_item_start_index = MODE_ASYN_JUMP_START;
+                    // else
+                    //     auto_item_start_index = MODE_STROBE_START;
                 }
-                else if (current_index >= SECTION_4_START && current_index <= SECTION_4_END)
-                {
-                    // speed_code = section_4_speed_table[current_speed];
-                    // next_frame_delay = section_4_delay_table[current_speed];
-                    speed_code = section_3_speed_table[current_speed];
-                    // next_frame_delay = section_3_delay_table[current_speed];
-                    next_frame_delay = 4960;
-                }
+                // else if (current_index >= SECTION_4_START && current_index <= SECTION_4_END)
+                // {
+                //     // speed_code = section_4_speed_table[current_speed];
+                //     // next_frame_delay = section_4_delay_table[current_speed];
+                //     speed_code = section_3_speed_table[current_speed];
+                //     // next_frame_delay = section_3_delay_table[current_speed];
+                //     next_frame_delay = 4960;
+                // }
                 else if (current_index >= SECTION_5_START && current_index <= SECTION_5_END)
                 {
-                    speed_code = section_5_speed_table[current_speed];
+                    // speed_code = section_5_speed_table[current_speed];
                     next_frame_delay = section_5_delay_table[current_speed];
+
+                    // auto_item_start_index = MODE_TWINKLE_START;
                 }
-                else if (current_index >= SECTION_6_START && current_index <= SECTION_6_END)
-                {
-                    // speed_code = section_6_speed_table[current_speed];
-                    // next_frame_delay = section_6_delay_table[current_speed];
-                    speed_code = section_3_speed_table[current_speed];
-                    // next_frame_delay = section_3_delay_table[current_speed];
-                    next_frame_delay = 4960;
-                }
+                // else if (current_index >= SECTION_6_START && current_index <= SECTION_6_END)
+                // {
+                //     // speed_code = section_6_speed_table[current_speed];
+                //     // next_frame_delay = section_6_delay_table[current_speed];
+                //     speed_code = section_3_speed_table[current_speed];
+                //     // next_frame_delay = section_3_delay_table[current_speed];
+                //     next_frame_delay = 4960;
+                // }
                 else if (current_index >= SECTION_7_START && current_index <= SECTION_7_END)
                 {
                     speed_code = section_7_speed_table[current_speed];
                     next_frame_delay = section_7_delay_table[current_speed];
+
+                    // auto_item_start_index = MODE_IN_WAVES_START;
                 }
                 // else if (current_index >= SECTION_8_START && current_index <= SECTION_8_END)
                 // {
@@ -957,15 +1238,15 @@ void main(void)
                     // speed_code = section_9_speed_table[current_speed];
                     // next_frame_delay = section_9_delay_table[current_speed];
 
-                    next_frame_delay = 0xFFFF;
+                    // next_frame_delay = 0xFFFF;
                     speed_code = 0x10;
                     // send_cmd_16bit_without_delay(XXXX);
                     // continue;
                 }
-                else
+                else // R3C4ã€æˆ–è€…å…¶ä»–æ¨¡å¼ï¼Œéƒ½ä¼šè¿›å…¥è¿™é‡Œ
                 {
-                    next_frame_delay = 0xFFFF;
-                    speed_code = 0x00;
+                    // next_frame_delay = 0xFFFF;
+                    // speed_code = 0x00;
                 }
 
                 speed_code <<= 8;
@@ -979,44 +1260,52 @@ void main(void)
         }
         else if (power_sta == POWER_STA_PRE_ON)
         {
-            // - ·¢ËÍ¿ª»ú²¨ĞÎ
+            // - å‘é€å¼€æœºæ³¢å½¢
             LED_CTL_PIN = 1;
             delay_ms(2);
             LED_CTL_PIN = 0;
-            delay_100us();
-            delay_100us();
+            // delay_100us();
+            // delay_100us();
+            delay_200us();
             LED_CTL_PIN = 1;
             delay_ms(3);
             LED_CTL_PIN = 0;
-            delay_100us();
-            delay_100us();
+            // delay_100us();
+            // delay_100us();
+            delay_200us();
             LED_CTL_PIN = 1;
             delay_ms(4);
             LED_CTL_PIN = 0;
-            delay_100us();
-            delay_100us();
+            // delay_100us();
+            // delay_100us();
+            delay_200us();
             LED_CTL_PIN = 1;
             delay_ms(5);
             LED_CTL_PIN = 0;
-            delay_100us();
-            delay_100us();
+            // delay_100us();
+            // delay_100us();
+            delay_200us();
             LED_CTL_PIN = 1;
             delay_ms(51);
 
             power_sta = POWER_STA_ON;
 
-            key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
-            next_frame_delay = 0;
+            // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
+            key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(2));
+            // next_frame_delay = 0; // ç«‹å³å‘é€ä¸‹ä¸€å¸§æ•°æ®
             // next_frame_delay = 0xFFFF;
         }
         else if (power_sta == POWER_STA_PRE_OFF)
         {
             power_sta = POWER_STA_OFF;
-            // - ·¢ËÍ¹Ø»ú²¨ĞÎ
+            // - å‘é€å…³æœºæ³¢å½¢
             send_cmd_16bit(0x0C00);
             send_cmd_16bit(0x0C00);
             delay_ms(40);
             LED_CTL_PIN = 0;
+            LED_4H_PIN = LED_TIM_PIN_OFF;
+            LED_6H_PIN = LED_TIM_PIN_OFF;
+            LED_8H_PIN = LED_TIM_PIN_OFF;
         }
     }
 }
@@ -1044,16 +1333,16 @@ void int_isr(void) __interrupt
     if (T2IF & T2IE)
     {
         T2IF = 0;
-        // Ã¿¸ô100us½øÈëÒ»´Î
+        // æ¯éš”100usè¿›å…¥ä¸€æ¬¡
 
 #if 1
-        { // ºìÍâ½âÂë
+        { // çº¢å¤–è§£ç 
             // static volatile u8 ir_fliter;
-            static volatile u16 ir_level_cnt; // ºìÍâĞÅºÅµÄÏÂ½µÑØÊ±¼ä¼ä¸ô¼ÆÊı
-            static volatile u8 __ir_data;     //
-            // static volatile u16 ir_long_press_cnt; // ™zœy¼tÍâßb¿ØéL°´µÄÓ‹”µÖµ
+            static volatile u16 ir_level_cnt; // çº¢å¤–ä¿¡å·çš„ä¸‹é™æ²¿æ—¶é—´é—´éš”è®¡æ•°
+            static volatile u32 __ir_data;    //
+            // static volatile u16 ir_long_press_cnt; // æª¢æ¸¬ç´…å¤–é™æ§é•·æŒ‰çš„è¨ˆæ•¸å€¼
 
-            // ¶ÔÃ¿¸öÏÂ½µÑØ½øĞĞ¼ÆÊı
+            // å¯¹æ¯ä¸ªä¸‹é™æ²¿è¿›è¡Œè®¡æ•°
             if (ir_level_cnt <= 1300)
                 ir_level_cnt++;
 
@@ -1072,105 +1361,113 @@ void int_isr(void) __interrupt
             // if (filter_level)
             if (IR_RECV_PIN)
             {
-                last_level_in_ir_pin = 1; // ±íÊ¾½ÓÊÕµ½µÄÊÇ¸ßµçÆ½
+                last_level_in_ir_pin = 1; // è¡¨ç¤ºæ¥æ”¶åˆ°çš„æ˜¯é«˜ç”µå¹³
 
-                // Èç¹ûÖ®Ç°Ò²ÊÇ¸ßµçÆ½
-                if (ir_level_cnt > 1200) // ³¬Ê±Ê±¼ä(120000us,120ms)
+                // å¦‚æœä¹‹å‰ä¹Ÿæ˜¯é«˜ç”µå¹³
+                if (ir_level_cnt > 1200) // è¶…æ—¶æ—¶é—´(120000us,120ms)
                 {
-                    // if (__ir_data != 0) // ³¬Ê±£¬ÇÒ½ÓÊÕµ½Êı¾İ(ºìÍâ½ÓÊÕ´¦Àíº¯ÊıÖĞ»á°Ñir_dataÇåÁã)
-                    if (__ir_data != 0) // ³¬Ê±£¬ÇÒ½ÓÊÕµ½Êı¾İ(ÏÖÔÚÊÇÔÚÖĞ¶Ï·şÎñº¯ÊıÖĞ°Ñ__ir_data×Ô¶¯ÇåÁã)
+                    // if (__ir_data != 0) // è¶…æ—¶ï¼Œä¸”æ¥æ”¶åˆ°æ•°æ®(çº¢å¤–æ¥æ”¶å¤„ç†å‡½æ•°ä¸­ä¼šæŠŠir_dataæ¸…é›¶)
+                    if (__ir_data != 0) // è¶…æ—¶ï¼Œä¸”æ¥æ”¶åˆ°æ•°æ®(ç°åœ¨æ˜¯åœ¨ä¸­æ–­æœåŠ¡å‡½æ•°ä¸­æŠŠ__ir_dataè‡ªåŠ¨æ¸…é›¶)
                     {
-                        // // ´øĞ£ÑéµÄ°æ±¾£º
-                        // if ((u8)(__ir_data >> 8) == (u8)(~__ir_data)) // Èç¹û¼üÖµµÄÔ­ÂëºÍ·´ÂëÏàµÈ
+                        // // å¸¦æ ¡éªŒçš„ç‰ˆæœ¬ï¼š
+                        // if ((u8)(__ir_data >> 8) == (u8)(~__ir_data)) // å¦‚æœé”®å€¼çš„åŸç å’Œåç ç›¸ç­‰
                         // {
                         // flag_is_recved_data = 1;
                         // }
 
-                        // ²»´øĞ£ÑéµÄ°æ±¾
+                        // ä¸å¸¦æ ¡éªŒçš„ç‰ˆæœ¬
                         if (0 == flag_is_recved_data)
                         {
                             ir_data = ~__ir_data;
+                            if ((__ir_data & 0xFF0000) == 0xF70000)
+                                ir_type = 0;
+                            else
+                                ir_type = 1;
                             __ir_data = 0;
                             flag_is_recved_data = 1;
                         }
                     }
 
-                    flag_is_recv_ir_repeat_code = 0; // ÈÏÎªÒ£¿ØÆ÷°´¼üÒÑ¾­°´ÏÂ£¬È»ºóËÉ¿ª
+                    flag_is_recv_ir_repeat_code = 0; // è®¤ä¸ºé¥æ§å™¨æŒ‰é”®å·²ç»æŒ‰ä¸‹ï¼Œç„¶åæ¾å¼€
                 }
             }
             else
             {
                 if (last_level_in_ir_pin)
                 {
-                    // Èç¹ûÖ®Ç°¼ì²âµ½µÄÊÇ¸ßµçÆ½£¬ÏÖÔÚ¼ì²âµ½ÁËµÍµçÆ½
-                    if (ir_level_cnt <= 8) // Ğ¡ÓÚ800us£¬ËµÃ÷½ÓÊÕµ½ÎŞĞ§µÄÊı¾İ£¬ÖØĞÂ½ÓÊÕ
+                    // å¦‚æœä¹‹å‰æ£€æµ‹åˆ°çš„æ˜¯é«˜ç”µå¹³ï¼Œç°åœ¨æ£€æµ‹åˆ°äº†ä½ç”µå¹³
+                    if (ir_level_cnt <= 8) // å°äº800usï¼Œè¯´æ˜æ¥æ”¶åˆ°æ— æ•ˆçš„æ•°æ®ï¼Œé‡æ–°æ¥æ”¶
                     {
                         // FLAG_IS_RECVED_ERR_IR_DATA = 1;
                         // flag_is_recv_ir_repeat_code = 0;
                     }
-                    else if (ir_level_cnt <= 18) // Ğ¡ÓÚ1800us,ËµÃ÷½ÓÊÕµ½ÁËÂß¼­0
+                    else if (ir_level_cnt <= 18) // å°äº1800us,è¯´æ˜æ¥æ”¶åˆ°äº†é€»è¾‘0
                     {
                         __ir_data <<= 1;
 
-                        // P15D = 0; // ²âÊÔºìÍâ½âÂë
-                        // P15D = ~P15D; // ²âÊÔºìÍâ½âÂë
+                        // P15D = 0; // æµ‹è¯•çº¢å¤–è§£ç 
+                        // P15D = ~P15D; // æµ‹è¯•çº¢å¤–è§£ç 
                     }
-                    else if (ir_level_cnt <= 26) // Ğ¡ÓÚ2600us,ËµÃ÷½ÓÊÕµ½ÁËÂß¼­1
+                    else if (ir_level_cnt <= 26) // å°äº2600us,è¯´æ˜æ¥æ”¶åˆ°äº†é€»è¾‘1
                     {
                         __ir_data <<= 1;
                         __ir_data |= 0x01;
 
-                        // P15D = 1; // ²âÊÔºìÍâ½âÂë
+                        // P15D = 1; // æµ‹è¯•çº¢å¤–è§£ç 
                     }
-                    else if (ir_level_cnt <= 150) // Ğ¡ÓÚ15000us,ËµÃ÷½ÓÊÕµ½ÁË¸ñÊ½Í·
+                    else if (ir_level_cnt <= 150) // å°äº15000us,è¯´æ˜æ¥æ”¶åˆ°äº†æ ¼å¼å¤´
                     {
                         // FLAG_IS_RECVED_ERR_IR_DATA = 1;
-                        // ir_long_press_cnt = 0; // ¼ÓÉÏÕâÒ»Ìõ»á¼ì²â²»µ½³¤°´
+                        // ir_long_press_cnt = 0; // åŠ ä¸Šè¿™ä¸€æ¡ä¼šæ£€æµ‹ä¸åˆ°é•¿æŒ‰
                     }
-                    else if (ir_level_cnt <= 420) // Ğ¡ÓÚ42ms,ËµÃ÷½ÓÊÕÍêÒ»´ÎÍêÕûµÄºìÍâĞÅºÅ
+                    else if (ir_level_cnt <= 420) // å°äº42ms,è¯´æ˜æ¥æ”¶å®Œä¸€æ¬¡å®Œæ•´çš„çº¢å¤–ä¿¡å·
                     {
-#if 0 // ´øĞ£ÑéµÄ°æ±¾£¬ÃüÁîÔ´ÂëÓëÃüÁî·´Âë½øĞĞĞ£Ñé
+#if 0 // å¸¦æ ¡éªŒçš„ç‰ˆæœ¬ï¼Œå‘½ä»¤æºç ä¸å‘½ä»¤åç è¿›è¡Œæ ¡éªŒ
     
-                if ((u8)(__ir_data >> 8) == (u8)(~__ir_data)) // Èç¹û¼üÖµµÄÔ­ÂëºÍ·´ÂëÏàµÈ
+                if ((u8)(__ir_data >> 8) == (u8)(~__ir_data)) // å¦‚æœé”®å€¼çš„åŸç å’Œåç ç›¸ç­‰
                 {
                     flag_is_recved_data = 1;
                     flag_is_recv_ir_repeat_code = 1; //
                     ir_long_press_cnt = 0;
                 }
-#else // ²»´øĞ£ÑéµÄ°æ±¾
+#else // ä¸å¸¦æ ¡éªŒçš„ç‰ˆæœ¬
                         if (0 == flag_is_recved_data)
                         {
                             ir_data = ~__ir_data;
+                            if ((__ir_data & 0xFF0000) == 0xF70000)
+                                ir_type = 0;
+                            else
+                                ir_type = 1;
                             __ir_data = 0;
                             flag_is_recved_data = 1;
                             flag_is_recv_ir_repeat_code = 1; //
                             // ir_long_press_cnt = 0;
                         }
-#endif // ²»´øĞ£ÑéµÄ°æ±¾
+#endif // ä¸å¸¦æ ¡éªŒçš„ç‰ˆæœ¬
                     }
-                    // else if (ir_level_cnt <= 1200) // Ğ¡ÓÚ120000,120ms,ËµÃ÷½ÓÊÕµ½ÁËÖØ¸´Âë
+                    // else if (ir_level_cnt <= 1200) // å°äº120000,120ms,è¯´æ˜æ¥æ”¶åˆ°äº†é‡å¤ç 
                     // {
                     //     // if (ir_long_press_cnt < 65535)
                     //     //     ir_long_press_cnt++;
                     // }
-                    else // ³¬¹ı120000,ËµÃ÷½ÓÊÕµ½ÎŞĞ§µÄÊı¾İ
-                    {
-                    }
+                    // else // è¶…è¿‡120000,è¯´æ˜æ¥æ”¶åˆ°æ— æ•ˆçš„æ•°æ®
+                    // {
+                    // }
 
                     ir_level_cnt = 0;
                 }
 
-                last_level_in_ir_pin = 0; // ±íÊ¾½ÓÊÕµ½µÄÊÇµÍµçÆ½
+                last_level_in_ir_pin = 0; // è¡¨ç¤ºæ¥æ”¶åˆ°çš„æ˜¯ä½ç”µå¹³
             }
-        } // ºìÍâ½âÂë
+        } // çº¢å¤–è§£ç 
 #endif
 
-        { // »úĞµ°´¼ü¼ì²â
+        { // æœºæ¢°æŒ‰é”®æ£€æµ‹
             static u16 key_press_cnt;
             if (0 == MECHANICAL_KEYING_PIN)
             {
 
-                if (key_press_cnt == 10000) // ³¤°´
+                if (key_press_cnt == 10000) // é•¿æŒ‰
                 {
                     ir_data = IR_KEY_OFF;
                     flag_is_recved_data = 1;
@@ -1180,9 +1477,9 @@ void int_isr(void) __interrupt
                     key_press_cnt++;
                 }
             }
-            else // Ì§Æğ
+            else // æŠ¬èµ·
             {
-                if (key_press_cnt >= 100 &&key_press_cnt < 10000) // ¶Ì°´
+                if (key_press_cnt >= 100 && key_press_cnt < 10000) // çŸ­æŒ‰
                 {
                     ir_data = IR_MECHANICAL_KEYING;
                     flag_is_recved_data = 1;
@@ -1190,14 +1487,15 @@ void int_isr(void) __interrupt
 
                 key_press_cnt = 0;
             }
-        } // »úĞµ°´¼ü¼ì²â
+        } // æœºæ¢°æŒ‰é”®æ£€æµ‹
 #if 0
         {
-            static volatile u16 ir_level_cnt = 0; // ºìÍâĞÅºÅµÄÏÂ½µÑØÊ±¼ä¼ä¸ô¼ÆÊı
-            static volatile u8 __ir_data = 0;     //
+            static volatile u8 ir_level_cnt = 0; // çº¢å¤–ä¿¡å·çš„ä¸‹é™æ²¿æ—¶é—´é—´éš”è®¡æ•°
+            static volatile u16 __ir_data = 0;     //
             static volatile u16 ir_timeout = 0;
             static u8 count = 0;
-            ir_level_cnt++;
+            if (ir_level_cnt < 0xFF)
+                ir_level_cnt++;
             if (IR_RECV_PIN)
             {
                 last_level_in_ir_pin = 1;
@@ -1211,7 +1509,7 @@ void int_isr(void) __interrupt
             {
                 if (last_level_in_ir_pin)
                 {
-                    // ÏÂ½µÑØ
+                    // ä¸‹é™æ²¿
 
                     if (ir_level_cnt < 18)
                     {
@@ -1228,6 +1526,10 @@ void int_isr(void) __interrupt
                     if (count == 24)
                     {
                         ir_data = __ir_data;
+                        if ((__ir_data & 0xFF00) == 0xEF00)
+                            ir_type = 1;
+                        else
+                            ir_type = 0;
                         flag_is_recved_data = 1;
                     }
                     else if (count >= 32)
@@ -1243,21 +1545,17 @@ void int_isr(void) __interrupt
             }
         }
 #endif
-    }
-    //=======T3========================
-    if (T3IF & T3IE)
-    {
-        T3IF = 0;
-        // ²âÊÔÍ¨¹ı£¬1ms½øÈëÒ»´Î
 
+        static u8 _100us_count = 0;
+        _100us_count++;
+        if (_100us_count >= 10)
         {
+            _100us_count = 0;
             if (next_frame_delay > 0 && next_frame_delay < 0xFFFF)
             {
                 next_frame_delay--;
             }
-        }
 
-        {
             if (timer_count)
             {
                 timer_count--;
@@ -1269,6 +1567,31 @@ void int_isr(void) __interrupt
             }
         }
     }
+    //=======T3========================
+    // if (T3IF & T3IE)
+    // {
+    //     T3IF = 0;
+    //     // æµ‹è¯•é€šè¿‡ï¼Œ1msè¿›å…¥ä¸€æ¬¡
+
+    //     {
+    //         if (next_frame_delay > 0 && next_frame_delay < 0xFFFF)
+    //         {
+    //             next_frame_delay--;
+    //         }
+    //     }
+
+    //     {
+    //         if (timer_count)
+    //         {
+    //             timer_count--;
+    //             if (timer_count == 0)
+    //             {
+    //                 ir_data = IR_KEY_OFF;
+    //                 flag_is_recved_data = 1;
+    //             }
+    //         }
+    //     }
+    // }
     __asm;
     swapar _statusbuf;
     movra _PFLAG;

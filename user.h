@@ -1,12 +1,12 @@
 /******************************************************************************
-;  *       @ĞÍºÅ                   : MC32F7361
-;  *       @´´½¨ÈÕÆÚ               : 2021.12.21
-;  *       @¹«Ë¾/×÷Õß              : SINOMCU-FAE
-;  *       @êÉÎùÎ¢¼¼ÊõÖ§³Ö         : 2048615934
-;  *       @êÉÎùÎ¢¹ÙÍø             : http://www.sinomcu.com/
-;  *       @°æÈ¨                   : 2021 SINOMCU¹«Ë¾°æÈ¨ËùÓĞ.
-;  *---------------------- ½¨Òé ---------------------------------
-;  *                   ±äÁ¿¶¨ÒåÊ±Ê¹ÓÃÈ«¾Ö±äÁ¿
+;  *       @å‹å·                   : MC32F7361
+;  *       @åˆ›å»ºæ—¥æœŸ               : 2021.12.21
+;  *       @å…¬å¸/ä½œè€…              : SINOMCU-FAE
+;  *       @æ™ŸçŸ½å¾®æŠ€æœ¯æ”¯æŒ         : 2048615934
+;  *       @æ™ŸçŸ½å¾®å®˜ç½‘             : http://www.sinomcu.com/
+;  *       @ç‰ˆæƒ                   : 2021 SINOMCUå…¬å¸ç‰ˆæƒæ‰€æœ‰.
+;  *---------------------- å»ºè®® ---------------------------------
+;  *                   å˜é‡å®šä¹‰æ—¶ä½¿ç”¨å…¨å±€å˜é‡
 ******************************************************************************/
 #ifndef USER
 #define USER
@@ -46,26 +46,33 @@
 
 #define USE_MY_DEBUG 0
 
-// ===================================================
-// »úĞµ°´¼üµÄÏà¹ØÅäÖÃ                               //
-// ===================================================
-#define MECHANICAL_KEYING_PIN P16D // »úĞµ°´¼ü¼ì²âÒı½Å
+// æŒ‰ä¸‹å®šæ—¶æ—¶ï¼Œå¯¹åº”çš„æŒ‡ç¤ºç¯æ§åˆ¶å¼•è„š
+#define LED_TIM_PIN_ON 0// å®šæ—¶æŒ‡ç¤ºç¯å¼€å¯æ—¶ï¼Œå¼•è„šå¯¹åº”çš„ç”µå¹³
+#define LED_TIM_PIN_OFF 1// å®šæ—¶æŒ‡ç¤ºç¯å…³é—­æ—¶ï¼Œå¼•è„šå¯¹åº”çš„ç”µå¹³
+#define LED_4H_PIN P13D 
+#define LED_6H_PIN P17D 
+#define LED_8H_PIN P00D 
 
-// Ñù»úµÄÒ£¿ØÆ÷¼üÖµ£º
-// ¶¨Òå¾ßÓĞÌØÊâ¹¦ÄÜµÄºìÍâÒ£¿Ø°´¼ü¼üÖµ
+// ===================================================
+// æœºæ¢°æŒ‰é”®çš„ç›¸å…³é…ç½®                               //
+// ===================================================
+#define MECHANICAL_KEYING_PIN P16D // æœºæ¢°æŒ‰é”®æ£€æµ‹å¼•è„š
+
+// æ ·æœºçš„é¥æ§å™¨é”®å€¼ï¼š
+// å®šä¹‰å…·æœ‰ç‰¹æ®ŠåŠŸèƒ½çš„çº¢å¤–é¥æ§æŒ‰é”®é”®å€¼
 // enum
 // {
 //     IR_KEY_ON = 0x08,
 //     IR_KEY_OFF = 0xC0,
 //     IR_KEY_AUTO = 0x80,
 //     IR_KEY_SPEED = 0x60,
-//     IR_KEY_R3C4 = 0xA8, // R3C4£¬Ã¿´Î°´ÏÂÊ±»á¸Ä±äµ±Ç°ÏÔÊ¾µÄÑÕÉ«
+//     IR_KEY_R3C4 = 0xA8, // R3C4ï¼Œæ¯æ¬¡æŒ‰ä¸‹æ—¶ä¼šæ”¹å˜å½“å‰æ˜¾ç¤ºçš„é¢œè‰²
 //     IR_KEY_R4C4_FADE = 0xB2,
 //     IR_KEY_R5C4_JUMP = 0x00,
 //     IR_KEY_R6C4_ASYN_FADE = 0x58, // R6C4,ASYN_FADE
 //     IR_KEY_R7C1_IN_WAVES = 0x38,  // R7C1, IN_WAVES
-//     IR_KEY_R7C2_STROBE = 0x28,    // R7C2£¬STROBE
-//     IR_KEY_R7C3_TWINKLE = 0xF0,   // R7C3£¬TWINKLE
+//     IR_KEY_R7C2_STROBE = 0x28,    // R7C2ï¼ŒSTROBE
+//     IR_KEY_R7C3_TWINKLE = 0xF0,   // R7C3ï¼ŒTWINKLE
 //     IR_KEY_R7C4_ASYN_JUMP = 0x30, // R7C4, ASYN_JUMP
 
 //     IR_KEY_R2C1 = 0x90,
@@ -85,7 +92,7 @@
 //     IR_KEY_R6C2 = 0x78,
 //     IR_KEY_R6C3 = 0x70,
 
-//     /// TODO:ĞŞ¸ÄÎªÕıÈ·µÄºìÍâÖµ
+//     /// TODO:ä¿®æ”¹ä¸ºæ­£ç¡®çš„çº¢å¤–å€¼
 //     IR_KEY_4H = 0x40,
 //     IR_KEY_6H = 0x12,
 //     IR_KEY_8H = 0x2A,
@@ -94,21 +101,21 @@
 //     IR_MECHANICAL_KEYING = 0x01,
 // };
 
-// ¿Í»§µÄÒ£¿ØÆ÷¼üÖµ£¨²»ÊÇÑù»úµÄ¼üÖµ£©£º
-// ¶¨Òå¾ßÓĞÌØÊâ¹¦ÄÜµÄºìÍâÒ£¿Ø°´¼ü¼üÖµ
+// å®¢æˆ·çš„é¥æ§å™¨é”®å€¼ï¼ˆä¸æ˜¯æ ·æœºçš„é”®å€¼ï¼‰ï¼š
+// å®šä¹‰å…·æœ‰ç‰¹æ®ŠåŠŸèƒ½çš„çº¢å¤–é¥æ§æŒ‰é”®é”®å€¼
 enum
 {
     IR_KEY_ON = 0x38,
     IR_KEY_OFF = 0xB8,
     IR_KEY_AUTO = 0x78,
     IR_KEY_SPEED = 0xF8,
-    IR_KEY_R3C4 = 0xE0, // R3C4£¬Ã¿´Î°´ÏÂÊ±»á¸Ä±äµ±Ç°ÏÔÊ¾µÄÑÕÉ«
+    IR_KEY_R3C4 = 0xE0, // R3C4ï¼Œæ¯æ¬¡æŒ‰ä¸‹æ—¶ä¼šæ”¹å˜å½“å‰æ˜¾ç¤ºçš„é¢œè‰²
     IR_KEY_R4C4_FADE = 0xD0,
     IR_KEY_R5C4_JUMP = 0xF0,
     IR_KEY_R6C4_ASYN_FADE = 0xC8, // R6C4,ASYN_FADE
     IR_KEY_R7C1_IN_WAVES = 0x28,  // R7C1, IN_WAVES
-    IR_KEY_R7C2_STROBE = 0xA8,    // R7C2£¬STROBE
-    IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3£¬TWINKLE
+    IR_KEY_R7C2_STROBE = 0xA8,    // R7C2ï¼ŒSTROBE
+    IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3ï¼ŒTWINKLE
     IR_KEY_R7C4_ASYN_JUMP = 0xE8, // R7C4, ASYN_JUMP
 
     IR_KEY_R2C1 = 0x00,
@@ -128,7 +135,7 @@ enum
     IR_KEY_R6C2 = 0x88,
     IR_KEY_R6C3 = 0x48,
 
-    /// TODO:ĞŞ¸ÄÎªÕıÈ·µÄºìÍâÖµ
+    /// TODO:ä¿®æ”¹ä¸ºæ­£ç¡®çš„çº¢å¤–å€¼
     IR_KEY_4H = 0x18,
     IR_KEY_6H = 0x98,
     IR_KEY_8H = 0x58,
@@ -137,38 +144,38 @@ enum
     IR_MECHANICAL_KEYING = 0x01,
 };
 
-// ¶¨Òå¾ßÓĞÌØÊâ¹¦ÄÜµÄºìÍâÒ£¿Ø°´¼ü¼üÖµ
+// å®šä¹‰å…·æœ‰ç‰¹æ®ŠåŠŸèƒ½çš„çº¢å¤–é¥æ§æŒ‰é”®é”®å€¼
 // enum
 // {
 //     IR_KEY_ON = 0x38,
 //     IR_KEY_OFF = 0xB8,
 //     IR_KEY_AUTO = 0x78,
 //     IR_KEY_SPEED = 0xF8,
-//     IR_KEY_R3C4 = 0xE0, // R3C4£¬Ã¿´Î°´ÏÂÊ±»á¸Ä±äµ±Ç°ÏÔÊ¾µÄÑÕÉ«
+//     IR_KEY_R3C4 = 0xE0, // R3C4ï¼Œæ¯æ¬¡æŒ‰ä¸‹æ—¶ä¼šæ”¹å˜å½“å‰æ˜¾ç¤ºçš„é¢œè‰²
 //     IR_KEY_R4C4_FADE = 0xD0,
 //     IR_KEY_R5C4_JUMP = 0xF0,
 //     IR_KEY_R6C4_ASYN_FADE = 0xC8, // R6C4,ASYN_FADE
 //     IR_KEY_R7C1_IN_WAVES = 0x28,  // R7C1, IN_WAVES
-//     IR_KEY_R7C2_STROBE = 0xA8,    // R7C2£¬STROBE
-//     IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3£¬TWINKLE
+//     IR_KEY_R7C2_STROBE = 0xA8,    // R7C2ï¼ŒSTROBE
+//     IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3ï¼ŒTWINKLE
 //     IR_KEY_R7C4_ASYN_JUMP = 0xE8, // R7C4, ASYN_JUMP
 // };
 
-// ¿Í»§µÄÒ£¿ØÆ÷¼üÖµ£¨²»ÊÇÑù»úµÄ¼üÖµ£©
-// #define UNUSE_VAL (0xFF) // Î´Ê¹ÓÃµÄÊı¾İÖµ
+// å®¢æˆ·çš„é¥æ§å™¨é”®å€¼ï¼ˆä¸æ˜¯æ ·æœºçš„é”®å€¼ï¼‰
+// #define UNUSE_VAL (0xFF) // æœªä½¿ç”¨çš„æ•°æ®å€¼
 // const u8 table_irkey[][5] = {
 //     /*
-//         [][0] ºìÍâÒ£¿ØµÄ°´¼ü¼üÖµ
-//         [][1] ~ [][4] °´¼ü¶ÔÓ¦µÄ£¬´ı·¢ËÍµÄÊı¾İ
+//         [][0] çº¢å¤–é¥æ§çš„æŒ‰é”®é”®å€¼
+//         [][1] ~ [][4] æŒ‰é”®å¯¹åº”çš„ï¼Œå¾…å‘é€çš„æ•°æ®
 //     */
-//     {IR_KEY_AUTO, 0x96, 0x45, 0x0F, 0x11}, /* AUTO£¬´ı·¢ËÍµÄÊı¾İÊÇ¹Ì¶¨µÄ */
+//     {IR_KEY_AUTO, 0x96, 0x45, 0x0F, 0x11}, /* AUTOï¼Œå¾…å‘é€çš„æ•°æ®æ˜¯å›ºå®šçš„ */
 
 //     {0x00, 0x00, 0x11, UNUSE_VAL, UNUSE_VAL}, /* R */
 //     {0x80, 0x00, 0x22, UNUSE_VAL, UNUSE_VAL}, /* G */
 //     {0x40, 0x00, 0x44, UNUSE_VAL, UNUSE_VAL}, /* B */
 //     {0xC0, 0x96, 0x45, 0x10, 0x77},           /* W */
 
-//     {0x20, 0x9F, 0x00, 0x10, 0x33}, /* R3C1 Rank 3 Column 1 µÚÈıĞĞµÚÒ»ÁĞ */
+//     {0x20, 0x9F, 0x00, 0x10, 0x33}, /* R3C1 Rank 3 Column 1 ç¬¬ä¸‰è¡Œç¬¬ä¸€åˆ— */
 //     {0xA0, 0x90, 0xF1, 0x10, 0x66}, /* R3C2 */
 //     {0x60, 0x93, 0x0F, 0x10, 0x55}, /* R3C3 */
 
@@ -210,45 +217,46 @@ typedef union
     } bits;
 } bit_flag;
 volatile bit_flag flag1;
-#define flag_is_recved_data flag1.bits.bit0 // ÊÇ·ñÊÕµ½ÁËºìÍâÊı¾İ£¬²¢ÇÒÃ»ÓĞ×ö´¦Àí
-#define flag_is_dev_open flag1.bits.bit1    // ±êÖ¾Î»£¬µÆ´®ÊÇ·ñÊ¹ÄÜ
+#define flag_is_recved_data flag1.bits.bit0 // æ˜¯å¦æ”¶åˆ°äº†çº¢å¤–æ•°æ®ï¼Œå¹¶ä¸”æ²¡æœ‰åšå¤„ç†
+#define flag_is_dev_open flag1.bits.bit1    // æ ‡å¿—ä½ï¼Œç¯ä¸²æ˜¯å¦ä½¿èƒ½
 
-#define last_level_in_ir_pin flag1.bits.bit2        // ÔÚºìÍâ½ÓÊÕ¶ÔÓ¦µÄÖĞ¶Ïº¯ÊıÖĞ£¬±íÊ¾ÉÏ´ÎÒı½Å¶ÔÓ¦µÄµçÆ½
-#define filter_level flag1.bits.bit3                // ÔÚºìÍâ½ÓÊÕ¶ÔÓ¦µÄÖĞ¶Ïº¯ÊıÖĞ£¬±íÊ¾ÂË²¨ºóµÄºìÍâĞÅºÅ½ÓÊÕÒı½ÅµÄµçÆ½
-#define flag_is_recv_ir_repeat_code flag1.bits.bit4 // ±íÊ¾ÊÇ·ñ½ÓÊÕµ½ÁËºìÍâĞÅºÅµÄÖØ¸´Âë£¬ÓÃÓÚÇø·ÖÒ£¿ØÆ÷ÊÇ·ñ°´ÏÂ°´¼üºóËÉ¿ª
+#define last_level_in_ir_pin flag1.bits.bit2        // åœ¨çº¢å¤–æ¥æ”¶å¯¹åº”çš„ä¸­æ–­å‡½æ•°ä¸­ï¼Œè¡¨ç¤ºä¸Šæ¬¡å¼•è„šå¯¹åº”çš„ç”µå¹³
+#define filter_level flag1.bits.bit3                // åœ¨çº¢å¤–æ¥æ”¶å¯¹åº”çš„ä¸­æ–­å‡½æ•°ä¸­ï¼Œè¡¨ç¤ºæ»¤æ³¢åçš„çº¢å¤–ä¿¡å·æ¥æ”¶å¼•è„šçš„ç”µå¹³
+#define flag_is_recv_ir_repeat_code flag1.bits.bit4 // è¡¨ç¤ºæ˜¯å¦æ¥æ”¶åˆ°äº†çº¢å¤–ä¿¡å·çš„é‡å¤ç ï¼Œç”¨äºåŒºåˆ†é¥æ§å™¨æ˜¯å¦æŒ‰ä¸‹æŒ‰é”®åæ¾å¼€
 
-#define flag_is_press_mechanical_keying flag1.bits.bit5 // ±íÊ¾ÊÇ·ñ°´ÏÂÁË»úĞµ°´¼ü
+// #define flag_is_press_mechanical_keying flag1.bits.bit5 // è¡¨ç¤ºæ˜¯å¦æŒ‰ä¸‹äº†æœºæ¢°æŒ‰é”®
 
-// #define flag_tim_set_period_is_arrive_in_auto_mode flag1.bits.bit5 // ±íÊ¾ÔÚ AUTO Ä£Ê½ÏÂ£¬ÊÇ·ñµ½ÁËÊı¾İ·¢ËÍµÄÖÜÆÚ
+// #define flag_tim_set_period_is_arrive_in_auto_mode flag1.bits.bit5 // è¡¨ç¤ºåœ¨ AUTO æ¨¡å¼ä¸‹ï¼Œæ˜¯å¦åˆ°äº†æ•°æ®å‘é€çš„å‘¨æœŸ
 
 #if USE_MY_DEBUG
 
-#define LED_CTL_PIN P22D // ¿ØÖÆµÆ´®µÄ¡¢¸øµÆ´®·¢ËÍ¿ØÖÆÃüÁîµÄÒı½Å
+#define LED_CTL_PIN P22D // æ§åˆ¶ç¯ä¸²çš„ã€ç»™ç¯ä¸²å‘é€æ§åˆ¶å‘½ä»¤çš„å¼•è„š
 
-// // ÔÚÑù°åÉÏµÄ½ÅÎ»£º
-// #define LED_CTL_PIN P04D // ¿ØÖÆµÆ´®µÄ¡¢¸øµÆ´®·¢ËÍ¿ØÖÆÃüÁîµÄÒı½Å
+// // åœ¨æ ·æ¿ä¸Šçš„è„šä½ï¼š
+// #define LED_CTL_PIN P04D // æ§åˆ¶ç¯ä¸²çš„ã€ç»™ç¯ä¸²å‘é€æ§åˆ¶å‘½ä»¤çš„å¼•è„š
 
 #else
 
-#define LED_CTL_PIN P04D // ¿ØÖÆµÆ´®µÄ¡¢¸øµÆ´®·¢ËÍ¿ØÖÆÃüÁîµÄÒı½Å
+#define LED_CTL_PIN P04D // æ§åˆ¶ç¯ä¸²çš„ã€ç»™ç¯ä¸²å‘é€æ§åˆ¶å‘½ä»¤çš„å¼•è„š
 
 #endif
 
 // ===================================================
-// Ò£¿ØÆ÷½âÂëÏà¹ØÅäÖÃ                                //
+// é¥æ§å™¨è§£ç ç›¸å…³é…ç½®                                //
 // ===================================================
 #if USE_MY_DEBUG
-#define IR_RECV_PIN P21D // ºìÍâĞÅºÅ½ÓÊÕÒı½Å
-// // ÔÚÑù°åÉÏµÄ½ÅÎ»£º
-// #define IR_RECV_PIN P16D // ºìÍâĞÅºÅ½ÓÊÕÒı½Å
+#define IR_RECV_PIN P21D // çº¢å¤–ä¿¡å·æ¥æ”¶å¼•è„š
+// // åœ¨æ ·æ¿ä¸Šçš„è„šä½ï¼š
+// #define IR_RECV_PIN P16D // çº¢å¤–ä¿¡å·æ¥æ”¶å¼•è„š
 #else
-#define IR_RECV_PIN P15D // ºìÍâĞÅºÅ½ÓÊÕÒı½Å
+#define IR_RECV_PIN P15D // çº¢å¤–ä¿¡å·æ¥æ”¶å¼•è„š
 #endif
 
-volatile u8 ir_data; // ´æ·ÅºìÍâ½ÓÊÕµ½µÄÊı¾İ
+volatile u8 ir_data; // å­˜æ”¾çº¢å¤–æ¥æ”¶åˆ°çš„æ•°æ®
+volatile u8 ir_type;
 
-// ºÁÃë¼¶ÑÓÊ± (Îó²î£ºÔÚ1%ÒÔÄÚ£¬1ms¡¢10ms¡¢100msÑÓÊ±µÄÎó²î¾ùĞ¡ÓÚ1%)
-// Ç°ÌáÌõ¼ş£ºFCPU = FHOSC / 4
+// æ¯«ç§’çº§å»¶æ—¶ (è¯¯å·®ï¼šåœ¨1%ä»¥å†…ï¼Œ1msã€10msã€100mså»¶æ—¶çš„è¯¯å·®å‡å°äº1%)
+// å‰ææ¡ä»¶ï¼šFCPU = FHOSC / 4
 void delay_ms(u16 xms)
 {
     while (xms)
@@ -258,26 +266,26 @@ void delay_ms(u16 xms)
         {
             Nop();
         }
-        xms--; // °Ñ --²Ù×÷·ÅÔÚwhile()ÅĞ¶ÏÌõ¼şÍâÃæ£¬¸ü½ÚÊ¡¿Õ¼ä
+        xms--; // æŠŠ --æ“ä½œæ”¾åœ¨while()åˆ¤æ–­æ¡ä»¶å¤–é¢ï¼Œæ›´èŠ‚çœç©ºé—´
 
         __asm;
-        clrwdt; // Î¹¹·
+        clrwdt; // å–‚ç‹—
         __endasm;
     }
 }
 
 // #if USE_MY_DEBUG
 #define DEBUG_PIN P22D
-#if 0  // ÒÔÏÂ³ÌĞòÔ¼Õ¼ÓÃ81×Ö½Ú¿Õ¼ä
-// Í¨¹ıÒ»¸öÒı½ÅÊä³öÊı¾İ(·¢ËÍÒ»´ÎÔ¼400ms)
+#if 0  // ä»¥ä¸‹ç¨‹åºçº¦å ç”¨81å­—èŠ‚ç©ºé—´
+// é€šè¿‡ä¸€ä¸ªå¼•è„šè¾“å‡ºæ•°æ®(å‘é€ä¸€æ¬¡çº¦400ms)
 // #define DEBUG_PIN P22D
 void send_data_msb(u32 send_data)
 {
-    // ÏÈ·¢ËÍ¸ñÊ½Í·
-    // __set_input_pull_up(); // ¸ßµçÆ½
+    // å…ˆå‘é€æ ¼å¼å¤´
+    // __set_input_pull_up(); // é«˜ç”µå¹³
     DEBUG_PIN = 1;
     delay_ms(15);
-    // __set_output_open_drain(); // µÍµçÆ½
+    // __set_output_open_drain(); // ä½ç”µå¹³
     DEBUG_PIN = 0;
     delay_ms(7); //
 
@@ -285,28 +293,28 @@ void send_data_msb(u32 send_data)
     {
         if ((send_data >> (32 - 1 - i)) & 0x01)
         {
-            // Èç¹ûÒª·¢ËÍÂß¼­1
-            // __set_input_pull_up();  	   // ¸ßµçÆ½
+            // å¦‚æœè¦å‘é€é€»è¾‘1
+            // __set_input_pull_up();  	   // é«˜ç”µå¹³
             DEBUG_PIN = 1;
             delay_ms(5); //
-            // __set_output_open_drain(); // µÍµçÆ½
+            // __set_output_open_drain(); // ä½ç”µå¹³
             DEBUG_PIN = 0;
             delay_ms(10); //
         }
         else
         {
-            // Èç¹ûÒª·¢ËÍÂß¼­0
-            // __set_input_pull_up();  	   // ¸ßµçÆ½
+            // å¦‚æœè¦å‘é€é€»è¾‘0
+            // __set_input_pull_up();  	   // é«˜ç”µå¹³
             DEBUG_PIN = 1;
             delay_ms(5); //
-            // __set_output_open_drain(); // µÍµçÆ½
+            // __set_output_open_drain(); // ä½ç”µå¹³
             DEBUG_PIN = 0;
             delay_ms(5); //
         }
     }
 
-    // ×îºó£¬ÉèÖÃÎªµÍµçÆ½
-    // __set_output_open_drain(); // µÍµçÆ½
+    // æœ€åï¼Œè®¾ç½®ä¸ºä½ç”µå¹³
+    // __set_output_open_drain(); // ä½ç”µå¹³
     DEBUG_PIN = 0;
     delay_ms(1);
     DEBUG_PIN = 1;
