@@ -772,7 +772,9 @@ void main(void)
         // - key deal
         if (flag_is_recved_data)
         {
-            if (ir_type)
+
+#if 0
+            if (ir_type) // 如果是样机的遥控器
             {
                 ir_type = 0;
                 switch (ir_data)
@@ -875,6 +877,8 @@ void main(void)
                     break;
                 }
             }
+#endif
+
             switch (ir_data)
             {
             case IR_KEY_ON:
@@ -1378,13 +1382,28 @@ void int_isr(void) __interrupt
                         // 不带校验的版本
                         if (0 == flag_is_recved_data)
                         {
-                            ir_data = ~__ir_data;
+
+#if 1 // 如果是样机的遥控，才进行处理，其他遥控器不处理
+                            if ((__ir_data & 0xFF0000) == 0xFF0000)
+                            {
+                                ir_data = ~__ir_data;
+                                __ir_data = 0;
+                                flag_is_recved_data = 1;
+                            }
+#endif // 如果是样机的遥控，才进行处理，其他遥控器不处理
+
+                            // ir_data = ~__ir_data;
+
+#if 0  // 兼容两种遥控器的版本
                             if ((__ir_data & 0xFF0000) == 0xF70000)
                                 ir_type = 0;
                             else
                                 ir_type = 1;
-                            __ir_data = 0;
-                            flag_is_recved_data = 1;
+#endif // 兼容两种遥控器的版本
+
+                            // __ir_data = 0;
+
+                            // flag_is_recved_data = 1;
                         }
                     }
 
@@ -1433,14 +1452,28 @@ void int_isr(void) __interrupt
 #else // 不带校验的版本
                         if (0 == flag_is_recved_data)
                         {
-                            ir_data = ~__ir_data;
+#if 1 // 如果是样机的遥控，才进行处理，其他遥控器不处理
+                            if ((__ir_data & 0xFF0000) == 0xFF0000)
+                            {
+                                ir_data = ~__ir_data;
+                                __ir_data = 0;
+                                flag_is_recved_data = 1;
+                                flag_is_recv_ir_repeat_code = 1; //
+                            }
+#endif // 如果是样机的遥控，才进行处理，其他遥控器不处理
+
+                            // ir_data = ~__ir_data;
+
+#if 0  // 兼容两种遥控器的版本
                             if ((__ir_data & 0xFF0000) == 0xF70000)
                                 ir_type = 0;
                             else
                                 ir_type = 1;
-                            __ir_data = 0;
-                            flag_is_recved_data = 1;
-                            flag_is_recv_ir_repeat_code = 1; //
+#endif // 兼容两种遥控器的版本
+
+                            // __ir_data = 0;
+                            // flag_is_recved_data = 1;
+                            // flag_is_recv_ir_repeat_code = 1; //
                             // ir_long_press_cnt = 0;
                         }
 #endif // 不带校验的版本

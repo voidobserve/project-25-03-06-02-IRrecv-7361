@@ -47,11 +47,11 @@
 #define USE_MY_DEBUG 0
 
 // 按下定时时，对应的指示灯控制引脚
-#define LED_TIM_PIN_ON 0// 定时指示灯开启时，引脚对应的电平
-#define LED_TIM_PIN_OFF 1// 定时指示灯关闭时，引脚对应的电平
-#define LED_4H_PIN P13D 
-#define LED_6H_PIN P17D 
-#define LED_8H_PIN P00D 
+#define LED_TIM_PIN_ON 0  // 定时指示灯开启时，引脚对应的电平
+#define LED_TIM_PIN_OFF 1 // 定时指示灯关闭时，引脚对应的电平
+#define LED_4H_PIN P13D
+#define LED_6H_PIN P17D
+#define LED_8H_PIN P00D
 
 // ===================================================
 // 机械按键的相关配置                               //
@@ -60,89 +60,89 @@
 
 // 样机的遥控器键值：
 // 定义具有特殊功能的红外遥控按键键值
-// enum
-// {
-//     IR_KEY_ON = 0x08,
-//     IR_KEY_OFF = 0xC0,
-//     IR_KEY_AUTO = 0x80,
-//     IR_KEY_SPEED = 0x60,
-//     IR_KEY_R3C4 = 0xA8, // R3C4，每次按下时会改变当前显示的颜色
-//     IR_KEY_R4C4_FADE = 0xB2,
-//     IR_KEY_R5C4_JUMP = 0x00,
-//     IR_KEY_R6C4_ASYN_FADE = 0x58, // R6C4,ASYN_FADE
-//     IR_KEY_R7C1_IN_WAVES = 0x38,  // R7C1, IN_WAVES
-//     IR_KEY_R7C2_STROBE = 0x28,    // R7C2，STROBE
-//     IR_KEY_R7C3_TWINKLE = 0xF0,   // R7C3，TWINKLE
-//     IR_KEY_R7C4_ASYN_JUMP = 0x30, // R7C4, ASYN_JUMP
-
-//     IR_KEY_R2C1 = 0x90,
-//     IR_KEY_R2C2 = 0xB8,
-//     IR_KEY_R2C3 = 0xF8,
-//     IR_KEY_R2C4 = 0xB0,
-//     IR_KEY_R3C1 = 0x98,
-//     IR_KEY_R3C2 = 0xD8,
-//     IR_KEY_R3C3 = 0x88,
-//     IR_KEY_R4C1 = 0xE8,
-//     IR_KEY_R4C2 = 0x48,
-//     IR_KEY_R4C3 = 0x68,
-//     IR_KEY_R5C1 = 0x02,
-//     IR_KEY_R5C2 = 0x32,
-//     IR_KEY_R5C3 = 0x20,
-//     IR_KEY_R6C1 = 0x50,
-//     IR_KEY_R6C2 = 0x78,
-//     IR_KEY_R6C3 = 0x70,
-
-//     /// TODO:修改为正确的红外值
-//     IR_KEY_4H = 0x40,
-//     IR_KEY_6H = 0x12,
-//     IR_KEY_8H = 0x2A,
-//     IR_KEY_TIME_OFF = 0xA0,
-
-//     IR_MECHANICAL_KEYING = 0x01,
-// };
-
-// 客户的遥控器键值（不是样机的键值）：
-// 定义具有特殊功能的红外遥控按键键值
 enum
 {
-    IR_KEY_ON = 0x38,
-    IR_KEY_OFF = 0xB8,
-    IR_KEY_AUTO = 0x78,
-    IR_KEY_SPEED = 0xF8,
-    IR_KEY_R3C4 = 0xE0, // R3C4，每次按下时会改变当前显示的颜色
-    IR_KEY_R4C4_FADE = 0xD0,
-    IR_KEY_R5C4_JUMP = 0xF0,
-    IR_KEY_R6C4_ASYN_FADE = 0xC8, // R6C4,ASYN_FADE
-    IR_KEY_R7C1_IN_WAVES = 0x28,  // R7C1, IN_WAVES
-    IR_KEY_R7C2_STROBE = 0xA8,    // R7C2，STROBE
-    IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3，TWINKLE
-    IR_KEY_R7C4_ASYN_JUMP = 0xE8, // R7C4, ASYN_JUMP
+    IR_KEY_ON = 0x08,
+    IR_KEY_OFF = 0xC0,
+    IR_KEY_AUTO = 0x80,
+    IR_KEY_SPEED = 0x60,
+    IR_KEY_R3C4 = 0xA8, // R3C4，每次按下时会改变当前显示的颜色
+    IR_KEY_R4C4_FADE = 0xB2,
+    IR_KEY_R5C4_JUMP = 0x00,
+    IR_KEY_R6C4_ASYN_FADE = 0x58, // R6C4,ASYN_FADE
+    IR_KEY_R7C1_IN_WAVES = 0x38,  // R7C1, IN_WAVES
+    IR_KEY_R7C2_STROBE = 0x28,    // R7C2，STROBE
+    IR_KEY_R7C3_TWINKLE = 0xF0,   // R7C3，TWINKLE
+    IR_KEY_R7C4_ASYN_JUMP = 0x30, // R7C4, ASYN_JUMP
 
-    IR_KEY_R2C1 = 0x00,
-    IR_KEY_R2C2 = 0x80,
-    IR_KEY_R2C3 = 0x40,
-    IR_KEY_R2C4 = 0xC0,
-    IR_KEY_R3C1 = 0x20,
-    IR_KEY_R3C2 = 0xA0,
-    IR_KEY_R3C3 = 0x60,
-    IR_KEY_R4C1 = 0x10,
-    IR_KEY_R4C2 = 0x90,
-    IR_KEY_R4C3 = 0x50,
-    IR_KEY_R5C1 = 0x30,
-    IR_KEY_R5C2 = 0xB0,
-    IR_KEY_R5C3 = 0x70,
-    IR_KEY_R6C1 = 0x08,
-    IR_KEY_R6C2 = 0x88,
-    IR_KEY_R6C3 = 0x48,
+    IR_KEY_R2C1 = 0x90,
+    IR_KEY_R2C2 = 0xB8,
+    IR_KEY_R2C3 = 0xF8,
+    IR_KEY_R2C4 = 0xB0,
+    IR_KEY_R3C1 = 0x98,
+    IR_KEY_R3C2 = 0xD8,
+    IR_KEY_R3C3 = 0x88,
+    IR_KEY_R4C1 = 0xE8,
+    IR_KEY_R4C2 = 0x48,
+    IR_KEY_R4C3 = 0x68,
+    IR_KEY_R5C1 = 0x02,
+    IR_KEY_R5C2 = 0x32,
+    IR_KEY_R5C3 = 0x20,
+    IR_KEY_R6C1 = 0x50,
+    IR_KEY_R6C2 = 0x78,
+    IR_KEY_R6C3 = 0x70,
 
     /// TODO:修改为正确的红外值
-    IR_KEY_4H = 0x18,
-    IR_KEY_6H = 0x98,
-    IR_KEY_8H = 0x58,
-    IR_KEY_TIME_OFF = 0xD8,
+    IR_KEY_4H = 0x40,
+    IR_KEY_6H = 0x12,
+    IR_KEY_8H = 0x2A,
+    IR_KEY_TIME_OFF = 0xA0,
 
     IR_MECHANICAL_KEYING = 0x01,
 };
+
+// 客户的遥控器键值（不是样机的键值）：
+// 定义具有特殊功能的红外遥控按键键值
+// enum
+// {
+//     IR_KEY_ON = 0x38,
+//     IR_KEY_OFF = 0xB8,
+//     IR_KEY_AUTO = 0x78,
+//     IR_KEY_SPEED = 0xF8,
+//     IR_KEY_R3C4 = 0xE0, // R3C4，每次按下时会改变当前显示的颜色
+//     IR_KEY_R4C4_FADE = 0xD0,
+//     IR_KEY_R5C4_JUMP = 0xF0,
+//     IR_KEY_R6C4_ASYN_FADE = 0xC8, // R6C4,ASYN_FADE
+//     IR_KEY_R7C1_IN_WAVES = 0x28,  // R7C1, IN_WAVES
+//     IR_KEY_R7C2_STROBE = 0xA8,    // R7C2，STROBE
+//     IR_KEY_R7C3_TWINKLE = 0x68,   // R7C3，TWINKLE
+//     IR_KEY_R7C4_ASYN_JUMP = 0xE8, // R7C4, ASYN_JUMP
+
+//     IR_KEY_R2C1 = 0x00,
+//     IR_KEY_R2C2 = 0x80,
+//     IR_KEY_R2C3 = 0x40,
+//     IR_KEY_R2C4 = 0xC0,
+//     IR_KEY_R3C1 = 0x20,
+//     IR_KEY_R3C2 = 0xA0,
+//     IR_KEY_R3C3 = 0x60,
+//     IR_KEY_R4C1 = 0x10,
+//     IR_KEY_R4C2 = 0x90,
+//     IR_KEY_R4C3 = 0x50,
+//     IR_KEY_R5C1 = 0x30,
+//     IR_KEY_R5C2 = 0xB0,
+//     IR_KEY_R5C3 = 0x70,
+//     IR_KEY_R6C1 = 0x08,
+//     IR_KEY_R6C2 = 0x88,
+//     IR_KEY_R6C3 = 0x48,
+
+//     /// TODO:修改为正确的红外值
+//     IR_KEY_4H = 0x18,
+//     IR_KEY_6H = 0x98,
+//     IR_KEY_8H = 0x58,
+//     IR_KEY_TIME_OFF = 0xD8,
+
+//     IR_MECHANICAL_KEYING = 0x01,
+// };
 
 // 定义具有特殊功能的红外遥控按键键值
 // enum
