@@ -670,6 +670,7 @@ void key_event_same_deal_ex(u8 start, u8 end, u16 own_data1)
     EEPROM_Write_Byte(2, own_data1);
     // EEPROM_Write_Byte(3, own_data1);
     EEPROM_Write_Byte(4, 0xA5A5);
+    EEPROM_Write_Byte(5, current_speed);
 
     eeprom_read_byte_index_0 = start;
     eeprom_read_byte_index_1 = end;
@@ -760,9 +761,10 @@ void main(void)
     if (EEPROM_Read_Byte(4) != 0xA5A5)
     {
         // 保存当前效果信息
+        // 如果是第一次上电，由于之前 Sys_Init(); 内清过RAM， current_speed 为0，所以接下来默认保存的是0
         key_event_same_deal(MODE_AUTO_START, MODE_AUTO_END, 0x9645, 0x9645);
     }
-    else
+    else // 如果不是第一次上电
     {
         power_sta = POWER_STA_PRE_ON;
     }
@@ -897,7 +899,7 @@ void main(void)
                 break;
 
             case IR_KEY_SPEED:
-                if (power_sta != POWER_STA_OFF)
+                if (power_sta != POWER_STA_OFF) // 如果设备仍在运行
                 {
                     current_speed++;
                     if (current_speed >= 4)
@@ -905,6 +907,8 @@ void main(void)
                     current_index = start_index; // 从第一帧开始
                     next_frame_delay = 0;        // 立刻发送第一帧波形
                     send_cmd_16bit(0x0C00);
+
+                    EEPROM_Write_Byte(5, current_speed);
                 }
                 break;
 
@@ -1255,7 +1259,7 @@ void main(void)
 
                 speed_code <<= 8;
                 speed_code |= main_table[current_index];
-                send_cmd_16bit(speed_code);
+                send_cmd_16bit(speed_code); // 发送带有速度值的数据帧
 
                 current_index++;
                 if (current_index > end_index)
@@ -1294,6 +1298,7 @@ void main(void)
 
             power_sta = POWER_STA_ON;
 
+            current_speed = EEPROM_Read_Byte(5);
             // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
             key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(2));
             // next_frame_delay = 0; // 立即发送下一帧数据
