@@ -557,10 +557,10 @@ const u16 section_2_delay_table[4] = {
 #define SECTION_3_START (MODE_ASYN_FADE_START)
 #define SECTION_3_END (MODE_ASYN_FADE_END)
 const u8 section_3_speed_table[4] = {
-    0x08,
-    0x0A,
     0x09,
     0x0B,
+    0x08,
+    0x0A,
 };
 // const u16 section_3_delay_table[4] = {
 //     4960,
@@ -630,7 +630,7 @@ const u16 section_7_delay_table[4] = {
     2000,
 };
 
-// STATIC
+// STATIC 静态显示的颜色
 #define SECTION_8_START (75)
 #define SECTION_8_END (77)
 // const u8 section_8_speed_table[] = {
@@ -641,7 +641,7 @@ const u16 section_7_delay_table[4] = {
 // };
 // const u16 section_8_delay_table[4] = {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
 
-// STATIC
+// STATIC 静态显示的颜色
 #define SECTION_9_START (78)
 #define SECTION_9_END (90)
 // const u8 section_9_speed_table[] = {
@@ -775,7 +775,7 @@ void main(void)
         if (flag_is_recved_data)
         {
 
-#if 0
+#if 0  // 兼容样机的遥控器和客户提供的遥控器的程序：
             if (ir_type) // 如果是样机的遥控器
             {
                 ir_type = 0;
@@ -879,7 +879,16 @@ void main(void)
                     break;
                 }
             }
-#endif
+#endif // 兼容样机的遥控器和客户提供的遥控器的程序
+
+            if (
+                (power_sta == POWER_STA_ON && ir_data == IR_KEY_ON) ||                                  /* 如果已经开机，不处理开机按键对应的功能 */
+                (power_sta == POWER_STA_OFF && ir_data != IR_KEY_ON && ir_data != IR_MECHANICAL_KEYING) /* 如果未开机，却按下了非开机按键或者非机械按键，不处理对应的功能 */
+            )
+            { 
+                flag_is_recved_data = 0; 
+                continue;
+            }
 
             switch (ir_data)
             {
@@ -899,7 +908,10 @@ void main(void)
                 break;
 
             case IR_KEY_SPEED:
-                if (power_sta != POWER_STA_OFF) // 如果设备仍在运行
+                if (
+                    power_sta != POWER_STA_OFF &&                   /* 如果设备仍在运行 */
+                    (!(current_index >= 75 && current_index <= 93)) /* 不处于单色模式，同时不处于R3C4按键对应的模式 */
+                )
                 {
                     current_speed++;
                     if (current_speed >= 4)
@@ -1103,7 +1115,7 @@ void main(void)
                 cur_mechanical_key_sta = 0;
                 break;
 
-            case IR_KEY_4H:
+            case IR_KEY_4H:  
                 timer_count = 4 * 60 * 60 * 1000;
                 // timer_count = 4 * 1000; // 测试用
 #if 0
