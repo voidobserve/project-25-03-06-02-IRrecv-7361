@@ -221,8 +221,8 @@ volatile bit_flag flag1;
 #define flag_is_dev_open flag1.bits.bit1    // 标志位，灯串是否使能
 
 #define last_level_in_ir_pin flag1.bits.bit2        // 在红外接收对应的中断函数中，表示上次引脚对应的电平
-#define filter_level flag1.bits.bit3                // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
-#define flag_is_recv_ir_repeat_code flag1.bits.bit4 // 表示是否接收到了红外信号的重复码，用于区分遥控器是否按下按键后松开
+// #define filter_level flag1.bits.bit3                // 在红外接收对应的中断函数中，表示滤波后的红外信号接收引脚的电平
+// #define flag_is_recv_ir_repeat_code flag1.bits.bit4 // 表示是否接收到了红外信号的重复码，用于区分遥控器是否按下按键后松开
 
 // #define flag_is_press_mechanical_keying flag1.bits.bit5 // 表示是否按下了机械按键
 
@@ -230,6 +230,7 @@ volatile bit_flag flag1;
 
 #if USE_MY_DEBUG
 
+// #define LED_CTL_PIN P21D // 控制灯串的、给灯串发送控制命令的引脚
 #define LED_CTL_PIN P22D // 控制灯串的、给灯串发送控制命令的引脚
 
 // // 在样板上的脚位：

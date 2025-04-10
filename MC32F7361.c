@@ -775,10 +775,12 @@ void main(void)
         if (flag_is_recved_data)
         {
 
-#if 0  // 兼容样机的遥控器和客户提供的遥控器的程序：
+#if 0 // 兼容样机的遥控器和客户提供的遥控器的程序：
+
             if (ir_type) // 如果是样机的遥控器
             {
                 ir_type = 0;
+
                 switch (ir_data)
                 {
                 case 0x08:
@@ -879,14 +881,15 @@ void main(void)
                     break;
                 }
             }
+
 #endif // 兼容样机的遥控器和客户提供的遥控器的程序
 
             if (
                 (power_sta == POWER_STA_ON && ir_data == IR_KEY_ON) ||                                  /* 如果已经开机，不处理开机按键对应的功能 */
                 (power_sta == POWER_STA_OFF && ir_data != IR_KEY_ON && ir_data != IR_MECHANICAL_KEYING) /* 如果未开机，却按下了非开机按键或者非机械按键，不处理对应的功能 */
             )
-            { 
-                flag_is_recved_data = 0; 
+            {
+                flag_is_recved_data = 0;
                 continue;
             }
 
@@ -898,7 +901,7 @@ void main(void)
 
             case IR_KEY_OFF:
                 power_sta = POWER_STA_PRE_OFF;
-                cur_mechanical_key_sta = 0;
+                // cur_mechanical_key_sta = 0;
                 break;
 
             case IR_KEY_AUTO:
@@ -1115,8 +1118,11 @@ void main(void)
                 cur_mechanical_key_sta = 0;
                 break;
 
-            case IR_KEY_4H:  
-                timer_count = 4 * 60 * 60 * 1000;
+            case IR_KEY_4H:
+                // timer_count = ((u32)4 * (u32)60 * (u32)60 * (u32)1000); // 如果不加强转，会有数据溢出
+                timer_count = 14400000UL; // 14400000UL == 4*60*60*1000 ms，4H
+                                          // timer_count = ((u32)30 * 60 * 1000); // 测试时使用 30min
+
                 // timer_count = 4 * 1000; // 测试用
 #if 0
                 // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
@@ -1129,7 +1135,10 @@ void main(void)
                 LED_4H_PIN = LED_TIM_PIN_ON;
                 break;
             case IR_KEY_6H:
-                timer_count = 6 * 60 * 60 * 1000;
+                // timer_count = ((u32)6 * (u32)60 * (u32)60 * (u32)1000);// 如果不加强转，会有数据溢出
+                timer_count = 216000000UL; // 216000000UL == 6*60*60*1000 ms，6H
+                                           // timer_count = ((u32)60 * 60 * 1000); // 测试时使用 1H
+
                 // timer_count = 6 * 1000; // 测试用
 #if 0
                 // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
@@ -1142,7 +1151,10 @@ void main(void)
                 LED_6H_PIN = LED_TIM_PIN_ON;
                 break;
             case IR_KEY_8H:
-                timer_count = 8 * 60 * 60 * 1000;
+                // timer_count = ((u32)8 * (u32)60 * (u32)60 * (u32)1000);// 如果不加强转，会有数据溢出
+                timer_count = 28800000UL; // 28800000UL == 8*60*60*1000，8H
+                                          // timer_count = ((u32)90 * 60 * 1000); // 测试时使用 90分钟
+
                 // timer_count = 8 * 1000; // 测试用
 #if 0
                 // key_event_same_deal(EEPROM_Read_Byte(0), EEPROM_Read_Byte(1), EEPROM_Read_Byte(2), EEPROM_Read_Byte(3));
@@ -1318,6 +1330,10 @@ void main(void)
         }
         else if (power_sta == POWER_STA_PRE_OFF)
         {
+            /* 通过机械按键关机、定时到来关机、通过遥控器关机，都清除定时，
+            防止关机后，定时时间到来时，还会发送关机对应的波形 */
+            timer_count = 0;
+            cur_mechanical_key_sta = 0; // 关机后，给该变量清零
             power_sta = POWER_STA_OFF;
             // - 发送关机波形
             send_cmd_16bit(0x0C00);
@@ -1356,7 +1372,7 @@ void int_isr(void) __interrupt
         T2IF = 0;
         // 每隔100us进入一次
 
-#if 1
+#if 1     // 红外解码
         { // 红外解码
             // static volatile u8 ir_fliter;
             static volatile u16 ir_level_cnt; // 红外信号的下降沿时间间隔计数
@@ -1409,22 +1425,19 @@ void int_isr(void) __interrupt
                             }
 #endif // 如果是样机的遥控，才进行处理，其他遥控器不处理
 
-                            // ir_data = ~__ir_data;
-
 #if 0  // 兼容两种遥控器的版本
                             if ((__ir_data & 0xFF0000) == 0xF70000)
                                 ir_type = 0;
                             else
                                 ir_type = 1;
+                            ir_data = ~__ir_data;
+                            __ir_data = 0;
+                            flag_is_recved_data = 1;
 #endif // 兼容两种遥控器的版本
-
-                            // __ir_data = 0;
-
-                            // flag_is_recved_data = 1;
                         }
                     }
 
-                    flag_is_recv_ir_repeat_code = 0; // 认为遥控器按键已经按下，然后松开
+                    // flag_is_recv_ir_repeat_code = 0; // 认为遥控器按键已经按下，然后松开
                 }
             }
             else
@@ -1475,23 +1488,21 @@ void int_isr(void) __interrupt
                                 ir_data = ~__ir_data;
                                 __ir_data = 0;
                                 flag_is_recved_data = 1;
-                                flag_is_recv_ir_repeat_code = 1; //
+                                // flag_is_recv_ir_repeat_code = 1; //
                             }
 #endif // 如果是样机的遥控，才进行处理，其他遥控器不处理
-
-                            // ir_data = ~__ir_data;
 
 #if 0  // 兼容两种遥控器的版本
                             if ((__ir_data & 0xFF0000) == 0xF70000)
                                 ir_type = 0;
                             else
                                 ir_type = 1;
-#endif // 兼容两种遥控器的版本
-
-                            // __ir_data = 0;
-                            // flag_is_recved_data = 1;
+                            ir_data = ~__ir_data;
+                            __ir_data = 0;
+                            flag_is_recved_data = 1;
                             // flag_is_recv_ir_repeat_code = 1; //
                             // ir_long_press_cnt = 0;
+#endif // 兼容两种遥控器的版本
                         }
 #endif // 不带校验的版本
                     }
@@ -1510,7 +1521,9 @@ void int_isr(void) __interrupt
                 last_level_in_ir_pin = 0; // 表示接收到的是低电平
             }
         } // 红外解码
-#endif
+#endif // 红外解码
+
+#if 1 // 机械按键检测
 
         { // 机械按键检测
             static u16 key_press_cnt;
@@ -1538,6 +1551,9 @@ void int_isr(void) __interrupt
                 key_press_cnt = 0;
             }
         } // 机械按键检测
+
+#endif // 机械按键检测
+
 #if 0
         {
             static volatile u8 ir_level_cnt = 0; // 红外信号的下降沿时间间隔计数
@@ -1611,8 +1627,11 @@ void int_isr(void) __interrupt
                 timer_count--;
                 if (timer_count == 0)
                 {
-                    ir_data = IR_KEY_OFF;
-                    flag_is_recved_data = 1;
+                    // ir_data = IR_KEY_OFF;
+                    // flag_is_recved_data = 1;
+
+                    flag_is_recved_data = 0;
+                    power_sta = POWER_STA_PRE_OFF;
                 }
             }
         }
